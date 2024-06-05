@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "scheme": "babelon",
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "name": "BabelOn",
+    "slug": "BabelOn",
+    "android": {
+      "package": "com.anonymous.BabelOn"
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.BabelOn"
+    }
+  }
+}
