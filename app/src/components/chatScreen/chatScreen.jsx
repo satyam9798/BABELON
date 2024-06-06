@@ -449,6 +449,7 @@ const Chat = ({ route, navigation }) => {
         chatType: "group",
       };
       dispatch(saveMessage(payload));
+      setClearInput(true);
     }
   };
   const sortedMessages = messages.slice().sort((a, b) => {

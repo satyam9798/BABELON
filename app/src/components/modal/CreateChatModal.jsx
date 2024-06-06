@@ -96,7 +96,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
           } else if (response?.ok) {
             response.json().then((body) => {
               console.log("link craere", linkType, chatType, body);
-              const link = `https://babel-mf43trwll-satyam9798s-projects.vercel.app/app/chat/2/${body.group_id}/${chatType}/${linkType}`;
+              const link = `https://665f342e0a98f0064e613e65--monumental-panda-db5186.netlify.app/app/chat/2/${body.group_id}/${chatType}/${linkType}`;
               const tempBackground = "#92a8d1";
               const permanentBackground = "#eea29a";
               const currentDate = new Date();
