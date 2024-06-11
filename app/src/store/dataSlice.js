@@ -17,31 +17,23 @@ export const setActiveChat = createAsyncThunk(
   "setActiveChat",
   async (req, { fulfillWithValue, rejectWithValue }) => {
     try {
-      // const data = await AsyncStorage.getItem("userData");
-      // console.log("req to set active chat", req);
-      console.log(11);
       const existingData = await AsyncStorage.getItem("userData");
-      // console.log("existing data", existingData);
       if (!existingData) {
         console.error("No existing data found");
         return;
       }
-      // console.log(12);
-      // console.log("data found", req);
+
       let userData = JSON.parse(existingData);
       const index = userData[req.chatType].findIndex(
         (item) => item.roomId == req.roomId
       );
-      // console.log(13);
       if (index === -1) {
         console.error("No object found with the given roomId");
         return;
       }
-      // console.log(14);
       const activeData = userData[req.chatType][index];
       return fulfillWithValue(activeData);
     } catch (error) {
-      console.log("error in set active data", error);
       return rejectWithValue("Something went wrong");
     }
   }
@@ -77,7 +69,6 @@ export const saveMessage = createAsyncThunk(
   "saveMessage",
   async (req, { fulfillWithValue, rejectWithValue }) => {
     try {
-      console.log("SAVING MESSAGEEeeeeee");
       const existingData = await AsyncStorage.getItem("userData");
       if (!existingData) {
         console.error("No existing data found");
@@ -104,24 +95,19 @@ export const saveStatus = createAsyncThunk(
   "saveMessage",
   async (req, { fulfillWithValue, rejectWithValue }) => {
     try {
-      // console.log("incoming request", req);
       const existingData = await AsyncStorage.getItem("userData");
       if (!existingData) {
         console.error("No existing data found");
         return;
       }
-      // console.log("data found", req);
       let userData = JSON.parse(existingData);
-      // console.log("userdata", userData);
       const index = userData[req.chatType].findIndex(
         (item) => item.roomId == req.roomId
       );
-      // console.log("index found", index);
       if (index === -1) {
         console.error("No object found with the given roomId");
         return;
       }
-      // console.log("push data target", userData[req.chatType][index]);
       userData[req.chatType][index].msg.chatStatus = req.chatStatus;
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
       const updatedData = await AsyncStorage.getItem("userData");

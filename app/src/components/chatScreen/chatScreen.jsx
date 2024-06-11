@@ -1,59 +1,25 @@
-import React, {
-  useCallback,
-  useState,
-  useLayoutEffect,
-  useEffect,
-  useRef,
-  useContext,
-} from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   GiftedChat,
   InputToolbar,
   Send,
   Bubble,
 } from "react-native-gifted-chat";
-import {
-  View,
-  Text,
-  Image,
-  TextInput,
-  ImageBackground,
-  TouchableOpacity,
-  SafeAreaView,
-  Alert,
-  Pressable,
-} from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import styles from "../../../styles/pages.style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import images from "../../../constants/images";
-import { addNewChat, exportData, editChatData } from "../../UserData/chatData";
 import {
   acceptRequest,
-  connectionStatus,
   acceptGroupRequest,
 } from "../../AppNavigator/services/apiServices";
 import Toast from "react-native-simple-toast";
 import { useFocusEffect } from "@react-navigation/native";
 import { WebSocketContext } from "../../context/socketProvider";
-import {
-  saveMessage,
-  saveStatus,
-  saveData,
-  setActiveChat,
-} from "../../store/dataSlice";
+import { saveMessage, saveData, setActiveChat } from "../../store/dataSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { retreiveAsyncData } from "../../store/asyncSlice";
-import { LinearGradient } from "expo-linear-gradient";
 import CustomInputToolbar from "./CustomInputToolBar";
-
-// const getRandomColor = () => {
-//   const letters = "0123456789ABCDEF";
-//   let color = "#";
-//   for (let i = 0; i < 6; i++) {
-//     color += letters[Math.floor(Math.random() * 16)];
-//   }
-//   return color;
-// };
 
 const Chat = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -69,8 +35,6 @@ const Chat = ({ route, navigation }) => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const maxCharacters = 180;
-
-  const ws = useRef(null);
 
   useEffect(() => {
     handlelink();
@@ -120,15 +84,9 @@ const Chat = ({ route, navigation }) => {
     };
     acceptRequest(payload)
       .then((response) => {
-        console.log("responce", response);
         if (response.ok) {
           response.json().then((body) => {
-            console.log("request body of accept single chat", body);
             if (body.message == "Connection request accepted") {
-              // setChatStatus(body.message);
-              // setChatToken(body.web_token);
-              // setIsChatDisabled(false);
-              // setIsReloadDisabled(true);
               const currentDate = new Date();
               const year = currentDate.getFullYear();
               const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Adding 1 because month starts from 0
@@ -154,15 +112,7 @@ const Chat = ({ route, navigation }) => {
                 msg: [],
                 timestamp: formattedDate,
               };
-              const payload = {
-                roomId: roomId,
-                chatStatus: body.message,
-                chatType: chatType,
-              };
               dispatch(saveData({ data: setData, chatType: chatType }));
-              //   dispatch(saveStatus(payload));
-              //   addNewChat(setData);
-              //   setChatData(setData);
             } else if (
               body.message ==
               "Connection request can be used with a single person only"
@@ -187,23 +137,17 @@ const Chat = ({ route, navigation }) => {
     };
     acceptGroupRequest(payload)
       .then((response) => {
-        // console.log("responce", response);
         if (response.ok) {
           response.json().then((body) => {
-            console.log("request body of accept group chat", body);
             if (body.message == "Joined in the group") {
-              //   setChatStatus(body.message);
-              //   setChatToken(body.web_token);
-              //   setIsChatDisabled(false);
-              //   setIsReloadDisabled(true);
               const currentDate = new Date();
               const year = currentDate.getFullYear();
               const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Adding 1 because month starts from 0
               const day = String(currentDate.getDate()).padStart(2, "0");
 
               const formattedDate = `${year}-${month}-${day}`;
-              const background =
-                "#" + Math.floor(Math.random() * 16777215).toString(16);
+              const tempBackground = "#92a8d1";
+              const permanentBackground = "#eea29a";
               const setData = {
                 roomId: roomId,
                 userType: 2,
@@ -211,13 +155,15 @@ const Chat = ({ route, navigation }) => {
                 linkType: linkType,
                 chatStatus: body.message,
                 chatToken: "",
-                displayPicture: linkType,
+                displayPicture:
+                  linkType == "temporary"
+                    ? tempBackground
+                    : permanentBackground,
                 username: `group${roomId}`,
                 msg: [],
                 timestamp: formattedDate,
               };
               dispatch(saveData({ data: setData, chatType: chatType }));
-              //   addNewChat(setData);
               setChatData(setData);
             } else if (
               body.message ==
@@ -234,7 +180,7 @@ const Chat = ({ route, navigation }) => {
         console.error("please try again", error);
       });
   }
-
+  //Input toolbar- customized
   const customtInputToolbar = (props) => {
     return (
       <>
@@ -374,7 +320,7 @@ const Chat = ({ route, navigation }) => {
   useFocusEffect(
     React.useCallback(() => {
       handleActiveChat();
-    }, [userData])
+    }, [userData, roomId])
   );
   useFocusEffect(
     React.useCallback(() => {
@@ -404,7 +350,6 @@ const Chat = ({ route, navigation }) => {
   );
 
   useEffect(() => {
-    console.log("clearonput", clearInput);
     if (clearInput) {
       setClearInput(false);
     }
@@ -452,9 +397,7 @@ const Chat = ({ route, navigation }) => {
       setClearInput(true);
     }
   };
-  const sortedMessages = messages.slice().sort((a, b) => {
-    return new Date(b.createdAt) - new Date(a.createdAt);
-  });
+
   return (
     <React.Fragment>
       <View style={styles.chatNavBar}>
@@ -480,8 +423,6 @@ const Chat = ({ route, navigation }) => {
             height: "100%",
             paddingBottom: 70,
           }}
-          // messageContainerStyle={{ backgroundColor: "blue" }}
-          // renderChatFooter={null}
           renderUsernameOnMessage={true}
           messages={messages}
           onSend={(messages) => onSend(messages)}
@@ -489,7 +430,6 @@ const Chat = ({ route, navigation }) => {
           renderAvatar={null}
           // renderInputToolbar={(props) => customtInputToolbar(props)}
           renderBubble={(props, index) => customBubbleContainer(props, index)}
-          //custom input bar with text count
           renderInputToolbar={(props) => (
             <CustomInputToolbar {...props} clearInput={clearInput} />
           )}

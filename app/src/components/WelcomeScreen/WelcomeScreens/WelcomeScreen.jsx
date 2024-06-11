@@ -5,11 +5,9 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
 } from "react-native";
 import styles from "../../../../styles/pages.style";
 import images from "../../../../constants/images";
-import * as Linking from "expo-linking";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 

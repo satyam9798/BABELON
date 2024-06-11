@@ -1,4 +1,3 @@
-// Loader.js
 import React from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import styles from "../../../styles/pages.style";

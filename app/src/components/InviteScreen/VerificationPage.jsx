@@ -19,8 +19,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../../../constants/theme";
 
 const VerificationPage = ({ navigation, route }) => {
-  const [showToast, setShowToast] = useState(false);
-  const [toastMsg, setToastMsg] = useState("Error Occured");
   const [input_1, setInput_1] = useState("");
   const [input_2, setInput_2] = useState("");
   const [input_3, setInput_3] = useState("");
@@ -126,17 +124,7 @@ const VerificationPage = ({ navigation, route }) => {
     };
 
     verifyMobileNumber(payload)
-      .then((response) => {
-        if (response.ok) {
-          // setToastMsg("Otp sent");
-          // setShowToast(true);
-          // setTimeout(() => setShowToast(false), 2000);
-        } else {
-          // setToastMsg("Can't send OTP at the moment");
-          // setShowToast(true);
-          // setTimeout(() => setShowToast(false), 2000);
-        }
-      })
+      .then((response) => {})
       .catch((error) => console.error("please register again", error));
 
     input1Ref.current.clear();

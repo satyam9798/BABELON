@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { View, Text, ScrollView } from "react-native";
+import React from "react";
+import { ScrollView } from "react-native";
 import ChatList from "./ChatList";
 
 const ChatScene = ({ data, navigation }) => {

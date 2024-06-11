@@ -48,11 +48,8 @@ export const retreiveAsyncData = createAsyncThunk(
   async (arg, { fulfillWithValue, rejectWithValue }) => {
     try {
       const asyncUsername = await AsyncStorage.getItem("username");
-      console.log("rejected asyncUsername", asyncUsername);
       const asyncLanguage = await AsyncStorage.getItem("language");
-      console.log("rejected asyncLanguage", asyncLanguage);
       const asyncMobileNum = await AsyncStorage.getItem("mobileNum");
-      console.log("rejected asyncMobileNum", asyncMobileNum);
       const asyncToken = await AsyncStorage.getItem("access");
       const asyncWebsocketToken = await AsyncStorage.getItem("websocket_token");
       const response = {
@@ -62,7 +59,6 @@ export const retreiveAsyncData = createAsyncThunk(
         token: asyncToken,
         websocketToken: asyncWebsocketToken,
       };
-      console.log("returning response async", response);
       return fulfillWithValue(response);
     } catch (error) {
       console.log(error);
@@ -75,7 +71,6 @@ export const getAsyncDetails = createAsyncThunk(
   "getAsyncDetails",
   async (arg, { fulfillWithValue, rejectWithValue }) => {
     try {
-      console.log("in async");
       const asyncUsername = await AsyncStorage.getItem("username");
       const asyncLanguage = await AsyncStorage.getItem("language");
       const asyncMobileNum = await AsyncStorage.getItem("mobileNum");
@@ -90,7 +85,6 @@ export const getAsyncDetails = createAsyncThunk(
       };
       return fulfillWithValue(response);
     } catch (error) {
-      console.log("rejected async", error);
       return rejectWithValue(error);
     }
   }
@@ -107,14 +101,11 @@ const asyncDataSlice = createSlice({
     fetchStatus: "",
   },
   reducers: {
-    getAsyncDetails: (state, action) => {
-      console.log("reducer", state, action);
-    },
+    getAsyncDetails: (state, action) => {},
   },
 
   extraReducers: (builder) => {
     builder.addCase(getAsyncDetails.fulfilled, (state, action) => {
-      console.log("fulfilled");
       state.token = action.payload.token;
       state.websocketToken = action.payload.websocketToken;
       state.mobileNum = action.payload.mobileNum;
@@ -123,11 +114,9 @@ const asyncDataSlice = createSlice({
       state.fetchStatus = "Success";
     });
     builder.addCase(getAsyncDetails.pending, (state) => {
-      console.log("pending");
       state.fetchStatus = "Loading...";
     });
     builder.addCase(getAsyncDetails.rejected, (state) => {
-      console.log("rejected async details");
       state.fetchStatus = "error";
     });
     builder.addCase(handleToken.fulfilled, (state, action) => {

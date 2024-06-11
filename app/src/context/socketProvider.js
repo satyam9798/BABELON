@@ -72,21 +72,14 @@ const WebSocketProvider = ({ children }) => {
       };
       ws.current.onmessage = (e) => {
         const msg = JSON.parse(e.data);
-        console.log("incoming", msg);
         if (msg?.type == "invalid_user") {
         }
         if (msg?.type == "token") {
+          // handle token messages
         } else if (msg?.type == "user_chats") {
+          // handle user_chats messages
         } else if (msg?.type == "message") {
-          console.log("received a message ", msg);
-          if (msg?.message.from == mobileNum) {
-            console.log(1);
-          } else {
-            console.log(2);
-          }
           if (msg?.message?.request_id) {
-            console.log(3);
-
             const payload = {
               roomId: msg.message?.request_id,
               content: msg.message?.translated_content,
@@ -94,13 +87,9 @@ const WebSocketProvider = ({ children }) => {
             };
             dispatch(saveMessage(payload));
           } else if (msg?.message?.group_id) {
-            console.log(4);
-
             if (msg?.message.from == mobileNum) {
-              console.log(5);
+              // ignoring own messages
             } else {
-              console.log(6);
-
               const payload = {
                 roomId: msg.message?.group_id,
                 content: msg.message?.translated_content,
@@ -108,9 +97,7 @@ const WebSocketProvider = ({ children }) => {
               };
               dispatch(saveMessage(payload));
             }
-            console.log(7);
           }
-          console.log(8);
         }
       };
     }

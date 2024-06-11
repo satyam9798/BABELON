@@ -5,8 +5,6 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
-  Pressable,
-  Alert,
   ImageBackground,
   SafeAreaView,
 } from "react-native";
@@ -14,27 +12,20 @@ import ChatScene from "./ChatScene";
 import styles from "../../../styles/pages.style";
 import images from "../../../constants/images";
 import CreateChatModal from "../modal/CreateChatModal";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import Toast from "react-native-simple-toast";
 import { getAsyncDetails } from "../../store/asyncSlice";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { useFocusEffect } from "@react-navigation/native";
 
 import { useSelector, useDispatch } from "react-redux";
-import { retreiveData, saveMessage } from "../../store/dataSlice";
+import { retreiveData } from "../../store/dataSlice";
 import { WebSocketContext } from "../../context/socketProvider";
-import SocketEventHandler from "../socketNavigator/SocketEventHandler";
 
 const MainScreen = ({ route, navigation }) => {
   const socket = useContext(WebSocketContext);
   const dispatch = useDispatch();
-  const ws = useRef(null);
-  const { userData, fetchStatus } = useSelector((state) => state.chatDataSlice);
-  const { mobileNum } = useSelector((state) => state.asyncDataSlice);
-  const [storageData, setStorageData] = useState();
+  const { userData } = useSelector((state) => state.chatDataSlice);
   const [data, setData] = useState();
-  const [input, setInput] = useState(" ");
   const [showCreateLinkModal, setShowCreateLinkModal] = useState(false);
   useFocusEffect(
     React.useCallback(() => {
@@ -42,14 +33,7 @@ const MainScreen = ({ route, navigation }) => {
       dispatch(retreiveData({}));
     }, [socket])
   );
-  const isValidJSON = (str) => {
-    try {
-      JSON.parse(str);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  };
+
   useEffect(() => {
     if (userData && userData.length >= 1) {
       const parsedData = JSON.parse(userData);

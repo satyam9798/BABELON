@@ -1,17 +1,9 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  Image,
-  TextInput,
-} from "react-native";
+import { View, Text, Modal, TouchableOpacity, Image } from "react-native";
 import styles from "../../../styles/pages.style";
 import images from "../../../constants/images";
 import { RadioButton } from "react-native-paper";
 import { COLORS } from "../../../constants/theme";
-import { addNewChat, exportData } from "../../UserData/chatData";
 import Toast from "react-native-simple-toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -20,8 +12,6 @@ import {
 } from "../../AppNavigator/services/apiServices";
 import { useSelector, useDispatch } from "react-redux";
 import { saveData } from "../../store/dataSlice";
-
-const createType = ["Permanent", "Temporary"];
 
 const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
   const dispatch = useDispatch();
@@ -44,7 +34,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
             navigation.navigate("RegistrationScreen");
           } else if (response?.ok) {
             response.json().then((body) => {
-              const link = `https://665f342e0a98f0064e613e65--monumental-panda-db5186.netlify.app/app/chat/2/${body.request_id}/${chatType}/${linkType}`;
+              const link = `https://bableon-django-1193e2d277c3.herokuapp.com/app/chat/2/${body.request_id}/${chatType}/${linkType}`;
               const tempBackground = "#92a8d1";
               const permanentBackground = "#eea29a";
               const currentDate = new Date();
@@ -96,7 +86,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
           } else if (response?.ok) {
             response.json().then((body) => {
               console.log("link craere", linkType, chatType, body);
-              const link = `https://665f342e0a98f0064e613e65--monumental-panda-db5186.netlify.app/app/chat/2/${body.group_id}/${chatType}/${linkType}`;
+              const link = `https://bableon-django-1193e2d277c3.herokuapp.com/app/chat/2/${body.group_id}/${chatType}/${linkType}`;
               const tempBackground = "#92a8d1";
               const permanentBackground = "#eea29a";
               const currentDate = new Date();
@@ -133,12 +123,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
         .catch((error) => console.error("please register again", error));
     }
   };
-  const isDisabled = () => {
-    if (linkType && chatType) {
-      return false;
-    }
-    return true;
-  };
+
   return (
     <Modal
       style={styles.centeredView}

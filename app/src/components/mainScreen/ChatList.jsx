@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  TouchableHighlight,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import styles from "../../../styles/pages.style";
 
 const ChatList = ({ data, navigation }) => {

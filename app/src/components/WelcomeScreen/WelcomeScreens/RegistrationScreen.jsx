@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
-  Dimensions,
   ImageBackground,
   SafeAreaView,
 } from "react-native";
@@ -46,8 +45,6 @@ const RegistrationScreen = ({ navigation }) => {
           navigation.navigate("otpverify", { mobileNum: input });
         } else {
           if (response.status == 409) {
-            // handle auto login if registered(required in later phase)
-            // navigation.navigate("main");
             navigation.navigate("otpverify", { mobileNum: input });
           }
         }

@@ -1,4 +1,3 @@
-// CustomInputToolbar.js
 import React, { useEffect, useState } from "react";
 import { View, TextInput, StyleSheet, Text } from "react-native";
 import { InputToolbar, Send } from "react-native-gifted-chat";
