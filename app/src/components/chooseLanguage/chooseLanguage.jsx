@@ -14,6 +14,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setUsernameAndLang } from "../../AppNavigator/services/apiServices";
 import { Dropdown } from "react-native-element-dropdown";
+import { getAsyncDetails, handleUserDetails } from "../../store/asyncSlice";
+
+import { useSelector, useDispatch } from "react-redux";
 
 const languages = [
   { label: "Assamese", value: "as" },
@@ -38,7 +41,8 @@ const ChooseLanguage = ({ navigation, route }) => {
   const [language, setlanguage] = useState("");
   const [value, setValue] = useState("");
   const [isFocus, setIsFocus] = useState(false);
-  const { access } = route?.params;
+  const { access, mobile } = route?.params;
+  const dispatch = useDispatch();
 
   retrieveData();
   const nextScreen = () => {
@@ -47,9 +51,10 @@ const ChooseLanguage = ({ navigation, route }) => {
       ssoToken: access,
     };
     setUsernameAndLang(postData)
-      .then((response) => {
+      .then(async (response) => {
         if (response.ok) {
-          storeData(userName, language);
+          await storeData(userName, language);
+          navigation.navigate("main");
         } else {
           setToastMsg("Username already exists");
           setShowToast(true);
@@ -72,9 +77,12 @@ const ChooseLanguage = ({ navigation, route }) => {
 
   async function storeData(username, language) {
     try {
-      await AsyncStorage.setItem("username", username);
-      await AsyncStorage.setItem("language", language);
-      navigation.navigate("main");
+      const payload = {
+        username,
+        language,
+        mobile,
+      };
+      dispatch(handleUserDetails(payload));
     } catch (error) {
       console.error("Failed to store SSO token:", error);
     }

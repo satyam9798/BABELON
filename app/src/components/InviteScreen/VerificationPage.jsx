@@ -93,7 +93,10 @@ const VerificationPage = ({ navigation, route }) => {
             console.log(body);
             setToken(body.access);
             storeData(body);
-            navigation.navigate("language", { access: body.access });
+            navigation.navigate("language", {
+              access: body.access,
+              mobile: mobileNum,
+            });
           });
         } else {
         }

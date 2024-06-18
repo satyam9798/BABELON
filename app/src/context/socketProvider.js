@@ -5,6 +5,7 @@ import { retreiveData, saveMessage } from "../store/dataSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-simple-toast";
 import { useNavigation } from "@react-navigation/native";
+import ReconnectingWebSocket from "reconnecting-websocket";
 
 const WebSocketContext = createContext(null);
 
@@ -15,12 +16,13 @@ const WebSocketProvider = ({ children }) => {
   const { language, mobileNum } = useSelector((state) => state.asyncDataSlice);
   const [socket, setSocket] = useState(null);
   useEffect(() => {
-    connectWebSocket();
+    if (language != null && mobileNum != null) {
+      connectWebSocket();
+    }
   }, [language, mobileNum]);
 
   useEffect(() => {
     dispatch(getAsyncDetails());
-    connectWebSocket();
     return () => {
       console.log("Unmouting web socket");
       if (socket) {
@@ -32,75 +34,69 @@ const WebSocketProvider = ({ children }) => {
     const asyncUsername = await AsyncStorage.getItem("username");
     const asyncLanguage = await AsyncStorage.getItem("language");
     const asyncMobileNum = await AsyncStorage.getItem("mobileNum");
-    ws.current = new WebSocket(
+    ws.current = new ReconnectingWebSocket(
       encodeURI(
         "wss://bableon-django-1193e2d277c3.herokuapp.com/ws/" +
-          asyncMobileNum +
-          "/?lang=" +
-          asyncLanguage
+        asyncMobileNum +
+        "/?lang=" +
+        asyncLanguage
       )
     );
     setSocket(ws.current);
-    // const connectSocket = async () => {
     const webToken = await AsyncStorage.getItem("websocket_token");
-    // console.log("websocket state", ws.current.readyState);
-    if (ws.current) {
-      ws.current.onopen = () => {
-        const initiateSocket = {
-          type: "token",
-          content: webToken,
-        };
-        sendData(JSON.stringify(initiateSocket));
-        if (ws.current.readyState === WebSocket.OPEN) {
-        }
-        // setInterval(function () {
-        const getChats = {
-          type: "get_chats",
-        };
-        sendData(JSON.stringify(getChats));
-        // }, 5000);
-        const checkMsg = {
-          type: "check_messages",
-        };
-        sendData(JSON.stringify(checkMsg));
+    ws.current.onopen = () => {
+      const initiateSocket = {
+        type: "token",
+        content: webToken,
       };
-      ws.current.onclose = (e) => {
-        console.warn("web socket connection closed", e);
+      sendData(JSON.stringify(initiateSocket));
+      if (ws.current.readyState === WebSocket.OPEN) {
+      }
+      const getChats = {
+        type: "get_chats",
       };
-      ws.current.onerror = (e) => {
-        console.warn("web socket error occured", e);
+      sendData(JSON.stringify(getChats));
+      const checkMsg = {
+        type: "check_messages",
       };
-      ws.current.onmessage = (e) => {
-        const msg = JSON.parse(e.data);
-        if (msg?.type == "invalid_user") {
-        }
-        if (msg?.type == "token") {
-          // handle token messages
-        } else if (msg?.type == "user_chats") {
-          // handle user_chats messages
-        } else if (msg?.type == "message") {
-          if (msg?.message?.request_id) {
+      sendData(JSON.stringify(checkMsg));
+    };
+    ws.current.onclose = (e) => {
+      console.warn("web socket connection closed", e);
+    };
+    ws.current.onerror = (e) => {
+      console.warn("web socket error occured", e);
+    };
+    ws.current.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg?.type == "invalid_user") {
+      }
+      if (msg?.type == "token") {
+        // handle token messages
+      } else if (msg?.type == "user_chats") {
+        // handle user_chats messages
+      } else if (msg?.type == "message") {
+        if (msg?.message?.request_id) {
+          const payload = {
+            roomId: msg.message?.request_id,
+            content: msg.message?.translated_content,
+            chatType: "single",
+          };
+          dispatch(saveMessage(payload));
+        } else if (msg?.message?.group_id) {
+          if (msg?.message.from == mobileNum) {
+            // ignoring own messages
+          } else {
             const payload = {
-              roomId: msg.message?.request_id,
+              roomId: msg.message?.group_id,
               content: msg.message?.translated_content,
-              chatType: "single",
+              chatType: "group",
             };
             dispatch(saveMessage(payload));
-          } else if (msg?.message?.group_id) {
-            if (msg?.message.from == mobileNum) {
-              // ignoring own messages
-            } else {
-              const payload = {
-                roomId: msg.message?.group_id,
-                content: msg.message?.translated_content,
-                chatType: "group",
-              };
-              dispatch(saveMessage(payload));
-            }
           }
         }
-      };
-    }
+      }
+    };
   };
   const sendData = (data) => {
     if (ws.current.readyState === WebSocket.OPEN) {

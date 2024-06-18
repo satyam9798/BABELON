@@ -30,11 +30,14 @@ export const handleUserDetails = createAsyncThunk(
     try {
       await AsyncStorage.setItem("username", req.username);
       await AsyncStorage.setItem("language", req.language);
+      await AsyncStorage.setItem("mobileNum", req.mobile);
       const asyncUsername = await AsyncStorage.getItem("username");
       const asyncLanguage = await AsyncStorage.getItem("language");
+      const asyncMobileNum = await AsyncStorage.getItem("mobileNum");
       const response = {
         username: asyncUsername,
         language: asyncLanguage,
+        mobileNum: asyncMobileNum
       };
       return fulfillWithValue(response);
     } catch (error) {
@@ -101,7 +104,7 @@ const asyncDataSlice = createSlice({
     fetchStatus: "",
   },
   reducers: {
-    getAsyncDetails: (state, action) => {},
+    getAsyncDetails: (state, action) => { },
   },
 
   extraReducers: (builder) => {
@@ -135,6 +138,7 @@ const asyncDataSlice = createSlice({
     builder.addCase(handleUserDetails.fulfilled, (state, action) => {
       state.username = action.payload.username;
       state.language = action.payload.language;
+      state.mobileNum = action.payload.mobileNum
       state.fetchStatus = "Success";
     });
     builder.addCase(handleUserDetails.pending, (state) => {
