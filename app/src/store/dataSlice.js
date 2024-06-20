@@ -38,6 +38,31 @@ export const setActiveChat = createAsyncThunk(
     }
   }
 );
+export const setActiveTranscriptedChat = createAsyncThunk(
+  "setActiveChat",
+  async (req, { fulfillWithValue, rejectWithValue }) => {
+    try {
+      const existingData = await AsyncStorage.getItem("userData");
+      if (!existingData) {
+        console.error("No existing data found");
+        return;
+      }
+
+      let userData = JSON.parse(existingData);
+      const index = userData[req.chatType].findIndex(
+        (item) => item.roomId == req.roomId
+      );
+      if (index === -1) {
+        console.error("No object found with the given roomId");
+        return;
+      }
+      const activeData = userData[req.chatType][index];
+      return fulfillWithValue(activeData);
+    } catch (error) {
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
 
 export const saveData = createAsyncThunk(
   "saveData",
@@ -83,6 +108,7 @@ export const saveMessage = createAsyncThunk(
         return;
       }
       userData[req.chatType][index].msg.push(req.content);
+      userData[req.chatType][index].translatedMsg.push(req.translatedContent);
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
       const updatedData = await AsyncStorage.getItem("userData");
       return fulfillWithValue(updatedData);

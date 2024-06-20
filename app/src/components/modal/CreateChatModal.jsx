@@ -57,6 +57,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                     : permanentBackground,
                 username: `unknown${body.request_id}`,
                 msg: [],
+                translatedMsg: [],
                 timestamp: formattedDate,
               };
               dispatch(saveData({ data: data, chatType: chatType }));
@@ -110,6 +111,8 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                     : permanentBackground,
                 username: username,
                 msg: [],
+                translatedMsg: [],
+
                 timestamp: formattedDate,
               };
               dispatch(saveData({ data: data, chatType: chatType }));

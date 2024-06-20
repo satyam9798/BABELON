@@ -20,6 +20,12 @@ import { saveMessage, saveData, setActiveChat } from "../../store/dataSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { retreiveAsyncData } from "../../store/asyncSlice";
 import CustomInputToolbar from "./CustomInputToolBar";
+import { Dropdown } from "react-native-element-dropdown";
+
+const transcriptType = [
+  { label: "Native", value: "native" },
+  { label: "Eng", value: "english" },
+];
 
 const Chat = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -27,6 +33,9 @@ const Chat = ({ route, navigation }) => {
   const { activeChat, userData } = useSelector((state) => state.chatDataSlice);
   const { mobileNum, username } = useSelector((state) => state.asyncDataSlice);
   const [clearInput, setClearInput] = useState(false);
+  const [isFocus, setIsFocus] = useState(false);
+  const [value, setValue] = useState("native");
+  const [transcript, setTranscript] = useState("native");
 
   const { data, userType, roomId, chatType, linkType } = route?.params || "";
   const [chatData, setChatData] = useState(data);
@@ -39,6 +48,25 @@ const Chat = ({ route, navigation }) => {
   useEffect(() => {
     handlelink();
   }, [roomId]);
+  useEffect(() => {
+    if (activeChat && activeChat.msg && activeChat.translatedMsg) {
+      if (transcript === "english") {
+        const sortedMessages = activeChat.translatedMsg.slice().sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        sortedMessages.map((item) => {});
+        setMessages(sortedMessages);
+        setChatName(activeChat.username);
+      } else if (transcript === "native") {
+        const sortedMessages = activeChat.msg.slice().sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        sortedMessages.map((item) => {});
+        setMessages(sortedMessages);
+        setChatName(activeChat.username);
+      }
+    }
+  }, [transcript]);
 
   const handlelink = async () => {
     if (userType == "1") {
@@ -110,6 +138,7 @@ const Chat = ({ route, navigation }) => {
                     : permanentBackground,
                 username: `unknown${roomId}`,
                 msg: [],
+                translatedMsg: [],
                 timestamp: formattedDate,
               };
               dispatch(saveData({ data: setData, chatType: chatType }));
@@ -161,6 +190,7 @@ const Chat = ({ route, navigation }) => {
                     : permanentBackground,
                 username: `group${roomId}`,
                 msg: [],
+                translatedMsg: [],
                 timestamp: formattedDate,
               };
               dispatch(saveData({ data: setData, chatType: chatType }));
@@ -324,27 +354,48 @@ const Chat = ({ route, navigation }) => {
   );
   useFocusEffect(
     React.useCallback(() => {
-      if (activeChat && activeChat.msg) {
-        const sortedMessages = activeChat.msg.slice().sort((a, b) => {
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        });
-        sortedMessages.map((item) => {
-          console.log(item.createdAt);
-        });
-        setMessages(sortedMessages);
-        setChatName(activeChat.username);
+      if (activeChat && activeChat.msg && activeChat.translatedMsg) {
+        if (transcript === "english") {
+          const sortedMessages = activeChat.translatedMsg
+            .slice()
+            .sort((a, b) => {
+              return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+          sortedMessages.map((item) => {});
+          setMessages(sortedMessages);
+          setChatName(activeChat.username);
+        } else if (transcript === "native") {
+          const sortedMessages = activeChat.msg.slice().sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
+          sortedMessages.map((item) => {});
+          setMessages(sortedMessages);
+          setChatName(activeChat.username);
+        }
       }
     }, [activeChat])
   );
   useFocusEffect(
     React.useCallback(() => {
       dispatch(retreiveAsyncData());
-      if (activeChat && activeChat.msg) {
-        const sortedMessages = activeChat.msg.slice().sort((a, b) => {
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        });
-        setMessages(sortedMessages);
-        setChatName(activeChat.username);
+      if (activeChat && activeChat.msg && activeChat.translatedMsg) {
+        if (transcript === "english") {
+          const sortedMessages = activeChat.translatedMsg
+            .slice()
+            .sort((a, b) => {
+              return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+          sortedMessages.map((item) => {});
+          setMessages(sortedMessages);
+          setChatName(activeChat.username);
+        } else if (transcript === "native") {
+          const sortedMessages = activeChat.msg.slice().sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
+          sortedMessages.map((item) => {});
+          setMessages(sortedMessages);
+          setChatName(activeChat.username);
+        }
       }
     }, [])
   );
@@ -410,11 +461,28 @@ const Chat = ({ route, navigation }) => {
           <Image style={styles.navBackIcon} source={images.LeftArrowIcon} />
         </TouchableOpacity>
         {activeChat && <Text>{activeChat.username}</Text>}
-        {userType == 1 ? (
-          <TouchableOpacity onPress={() => {}}></TouchableOpacity>
-        ) : (
-          <View></View>
-        )}
+        <View style={styles.regDropdownContainer}>
+          <Dropdown
+            style={[styles.regDropdown, isFocus && { borderColor: "blue" }]}
+            placeholderStyle={styles.regPlaceholderStyle}
+            selectedTextStyle={styles.regSelectedTextStyle}
+            inputSearchStyle={styles.regInputSearchStyle}
+            iconStyle={styles.regIconStyle}
+            data={transcriptType}
+            maxHeight={300}
+            labelField="label"
+            valueField="value"
+            placeholder={!isFocus ? "   +   " : "  ...  "}
+            searchPlaceholder="Search"
+            value={value}
+            onFocus={() => setIsFocus(true)}
+            onBlur={() => setIsFocus(false)}
+            onChange={(item) => {
+              setTranscript(item.value);
+              setIsFocus(false);
+            }}
+          />
+        </View>
       </View>
       {userType && (
         <GiftedChat

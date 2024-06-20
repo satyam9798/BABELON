@@ -21,11 +21,6 @@ const WelcomeScreen = ({ navigation }) => {
     const asyncLanguage = await AsyncStorage.getItem("language");
     const asyncMobileNum = await AsyncStorage.getItem("mobileNum");
     const webToken = await AsyncStorage.getItem("websocket_token");
-    if (!asyncLanguage || !asyncMobileNum || !asyncUsername || !webToken) {
-      navigator.navigate("WelcomeScreen");
-    } else {
-      navigation.navigate("main");
-    }
   };
 
   const nextScreen = () => {

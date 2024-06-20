@@ -55,6 +55,12 @@ export const retreiveAsyncData = createAsyncThunk(
       const asyncMobileNum = await AsyncStorage.getItem("mobileNum");
       const asyncToken = await AsyncStorage.getItem("access");
       const asyncWebsocketToken = await AsyncStorage.getItem("websocket_token");
+
+      if (!asyncUsername || !asyncLanguage || !asyncMobileNum || !asyncToken || !asyncWebsocketToken) {
+        console.log("Missing data in Async Storage");
+        return fulfillWithValue(undefined);
+      }
+
       const response = {
         username: asyncUsername,
         language: asyncLanguage,
