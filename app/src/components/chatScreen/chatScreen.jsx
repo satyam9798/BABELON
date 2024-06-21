@@ -426,6 +426,7 @@ const Chat = ({ route, navigation }) => {
       const payload = {
         roomId: roomId,
         content: messages[0],
+        translatedContent: messages[0],
         chatType: "single",
       };
       dispatch(saveMessage(payload));
@@ -442,6 +443,7 @@ const Chat = ({ route, navigation }) => {
       const payload = {
         roomId: roomId,
         content: messages[0],
+        translatedContent: messages[0],
         chatType: "group",
       };
       dispatch(saveMessage(payload));

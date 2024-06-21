@@ -76,7 +76,6 @@ const WebSocketProvider = ({ children }) => {
       } else if (msg?.type == "user_chats") {
         // handle user_chats messages
       } else if (msg?.type == "message") {
-        console.log("msg", msg.message)
         if (msg?.message?.request_id) {
           const payload = {
             roomId: msg.message?.request_id,
@@ -92,6 +91,7 @@ const WebSocketProvider = ({ children }) => {
           } else {
             const payload = {
               roomId: msg.message?.group_id,
+              translatedContent: msg.message?.content,
               content: msg.message?.translated_content,
               chatType: "group",
             };
