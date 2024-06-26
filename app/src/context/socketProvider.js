@@ -82,8 +82,8 @@ const WebSocketProvider = ({ children }) => {
             translatedContent: msg.message?.content,
             content: msg.message?.translated_content,
             chatType: "single",
+            username: msg.message?.from_username,
           };
-          console.log("payload to be saved", payload)
           dispatch(saveMessage(payload));
         } else if (msg?.message?.group_id) {
           if (msg?.message.from == mobileNum) {

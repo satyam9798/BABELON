@@ -8,11 +8,12 @@ import RegistrationScreen from "../components/WelcomeScreen/WelcomeScreens/Regis
 import VerificationPage from "../components/InviteScreen/VerificationPage";
 import ChooseLanguage from "../components/chooseLanguage/chooseLanguage";
 import SocketEventHandler from "../components/socketNavigator/SocketEventHandler";
-import { useEffect, useState } from "react";
-import * as Linking from "expo-linking";
+import { useEffect, useRef, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import Loader from "../components/loader/Loader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Linking from "expo-linking";
+import { useNavigation } from "@react-navigation/native";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,8 @@ const getInitialRouteName = async () => {
 const AppNavigator = ({}) => {
   const [initialRouteName, setInitialRouteName] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigation = useNavigation();
+  const navigationRef = useRef();
   const linking = {
     prefixes: [
       "https://bableon-django-1193e2d277c3.herokuapp.com/app",
@@ -50,6 +53,9 @@ const AppNavigator = ({}) => {
         },
       },
     },
+    async getInitialURL() {
+      return Linking.getInitialURL();
+    },
   };
 
   useEffect(() => {
@@ -58,22 +64,54 @@ const AppNavigator = ({}) => {
       setInitialRouteName(routeName);
       setIsLoading(false);
     };
-
     fetchInitialRouteName();
   }, []);
+
   useEffect(() => {
-    const handleDeepLink = ({ url }) => {
-      const route = url.replace(/.*?:\/\//g, "");
-      const routeName = route.split("/")[0];
-      setTimeout(() => {
-        navigation.navigate("main");
-        Linking.openURL("main");
-      }, 1000);
+    Linking.getInitialURL()
+      .then(async (url) => {
+        if (url !== null) {
+          console.log("navigating to url", url);
+          const supported = await Linking.canOpenURL(url);
+          if (supported) {
+            // Opening the link with some app, if the URL scheme is "http" the web link should be opened
+            // by some browser in the mobile
+            // await Linking.openURL("babelon://main");
+          } else {
+            console.log("unSupported link");
+
+            Alert.alert(`Don't know how to open this URL: ${url}`);
+          }
+          // navigation.navigate(url);
+          // if opened from notification if app is killed
+        }
+      })
+      .catch((err) => console.error("An error occurred", err));
+
+    let subcribtion = Linking.addEventListener("url", handleOpenURL);
+    subcribtion.subscriber;
+
+    return () => {
+      subcribtion.remove();
     };
-    Linking.addEventListener("url", (event) => {
-      handleDeepLink(event);
-    });
   }, []);
+
+  async function handleOpenURL(evt) {
+    // Will be called when the link is pressed foreground
+    const supported = await Linking.canOpenURL(evt.url);
+    if (supported) {
+      // Opening the link with some app, if the URL scheme is "http" the web link should be opened
+      // by some browser in the mobile
+      // await Linking.openURL(url);
+    } else {
+      console.log("unSupported link");
+    }
+  }
+
+  if (isLoading || !initialRouteName) {
+    return <Loader />;
+  }
+
   return (
     <>
       {initialRouteName && (

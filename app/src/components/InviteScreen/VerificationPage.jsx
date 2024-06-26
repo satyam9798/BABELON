@@ -90,7 +90,6 @@ const VerificationPage = ({ navigation, route }) => {
       .then((response) => {
         if (response.status == 200) {
           response.json().then((body) => {
-            console.log(body);
             setToken(body.access);
             storeData(body);
             navigation.navigate("language", {

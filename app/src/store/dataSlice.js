@@ -107,6 +107,9 @@ export const saveMessage = createAsyncThunk(
         console.error("No object found with the given roomId");
         return;
       }
+      if (req.username) {
+        userData[req.chatType][index].username = req.username;
+      }
       userData[req.chatType][index].msg.push(req.content);
       userData[req.chatType][index].translatedMsg.push(req.translatedContent);
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
