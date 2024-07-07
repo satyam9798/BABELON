@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
     marginVertical: "3%",
     textAlign: "left",
     fontSize: SIZES.large,
-    color: COLORS.white,
+    // color: COLORS.white,
     // fontFamily: FONTS.fontSubHeading,
     fontWeight: FONTS.bold,
   },

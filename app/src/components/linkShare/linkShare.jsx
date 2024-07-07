@@ -10,7 +10,7 @@ import {
   Linking,
 } from "react-native";
 import images from "../../../constants/images";
-import styles from "../../../styles/pages.style";
+import styles from "../../../styles/index.styles";
 import * as Clipboard from "expo-clipboard";
 import Toast from "react-native-simple-toast";
 import QRCode from "react-native-qrcode-svg";
@@ -18,7 +18,7 @@ import QRCode from "react-native-qrcode-svg";
 const ShareLink = ({ route, navigation }) => {
   const { link, data } = route?.params;
   const { width, height } = Dimensions.get("window");
-  const displayLink = link?.slice(0, 40) + "...";
+  const displayLink = link?.slice(0, 30) + "...";
   const nextScreen = () => {
     navigation.navigate("chat", {
       data: data,
@@ -88,12 +88,12 @@ const ShareLink = ({ route, navigation }) => {
 
   return (
     <>
-      <View style={{ backgroundColor: "#FFFFFF", width: "100%" }}>
+      <View style={{ backgroundColor: "#f5f5f5", width: "100%", marginTop: 5 }}>
         <TouchableOpacity onPress={handleBackNavigation}>
           <Image style={styles.backIcon} source={images.LeftArrowBlackIcon} />
         </TouchableOpacity>
       </View>
-      <View style={[styles.container, styles.regContainer]}>
+      <View style={[styles.container, styles.linkShareContainer]}>
         <View style={styles.linkShareScreenContainer}>
           <Text
             style={

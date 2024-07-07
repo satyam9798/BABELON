@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, TextInput, StyleSheet, Text } from "react-native";
+import { View, TextInput, TouchableOpacity, Text, Image } from "react-native";
 import { InputToolbar, Send } from "react-native-gifted-chat";
-import styles from "../../../styles/pages.style";
+import styles from "../../../styles/index.styles";
+import images from "../../../constants/images";
 
 const CustomInputToolbar = (props) => {
   const [text, setText] = useState("");
@@ -38,7 +39,12 @@ const CustomInputToolbar = (props) => {
           </View>
         )}
         renderSend={(sendProps) => (
-          <Send {...sendProps} containerStyle={styles.sendContainer} />
+          <Send {...sendProps}>
+            <View style={styles.sendButton}>
+              <Image source={images.Send} style={styles.sendIcon} />
+            </View>
+          </Send>
+          // containerStyle={styles.sendContainer} />
         )}
       />
     </View>

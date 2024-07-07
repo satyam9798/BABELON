@@ -14,13 +14,23 @@ import Loader from "../components/loader/Loader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Linking from "expo-linking";
 import { useNavigation } from "@react-navigation/native";
+import SettingsPage from "../components/profile/Settings";
 
 const Stack = createNativeStackNavigator();
 
 const getInitialRouteName = async () => {
   try {
+    // setTimeout(async () => {
+    console.log(1);
     const token = await AsyncStorage.getItem("access");
-    return token ? "main" : "WelcomeScreen";
+    const username = await AsyncStorage.getItem("username");
+    console.log(2, username);
+    if (token && username) {
+      return "main";
+    } else {
+      return "WelcomeScreen";
+    }
+    // }, 2000);
   } catch (error) {
     console.error("Failed to fetch initial route name:", error);
     return "WelcomeScreen"; // Default fallback
@@ -135,6 +145,7 @@ const AppNavigator = ({}) => {
             <Stack.Screen name="otpverify" component={VerificationPage} />
             <Stack.Screen name="language" component={ChooseLanguage} />
             <Stack.Screen name="main" component={MainScreen} />
+            <Stack.Screen name="settings" component={SettingsPage} />
             <Stack.Screen name="linkShare" component={linkShare} />
             <Stack.Screen name="chat" component={chatScreen} />
             <Stack.Screen

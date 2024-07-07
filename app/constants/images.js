@@ -1,8 +1,14 @@
-import Welcomebanner from "../../assets/images/banner.jpg";
-import LandingBanner from "../../assets/images/banner2.jpg";
-import MobileImage from "../../assets/images/mobileReg.jpg";
-import verifyOTP from "../../assets/images/otp.png";
-import LangImage from "../../assets/images/language.png";
+
+import Welcomebanner from "../../assets/images/logos/banner.png";
+import Earth from "../../assets/images/logos/earth.png";
+import People from "../../assets/images/logos/people.png";
+import Otp from "../../assets/images/logos/otp.png"
+import Lang from "../../assets/images/logos/lang.png"
+import Pencil from "../../assets/images/logos/pencil.png";
+import Group from "../../assets/images/logos/group.png";
+import Single from "../../assets/images/logos/single.png";
+import Send from "../../assets/images/logos/sendInput.png";
+
 import QrImage from "../../assets/images/qrCode.png";
 import ArrowRight from "../../assets/images/right-arrow.png";
 import UserName from "../../assets/images/user.png";
@@ -24,10 +30,14 @@ import BackgroundImage from "../../assets/images/background_image.png";
 
 export default {
   Welcomebanner,
-  LandingBanner,
-  MobileImage,
-  verifyOTP,
-  LangImage,
+  Earth,
+  People,
+  Otp,
+  Lang,
+  Pencil,
+  Group,
+  Single,
+  Send,
   QrImage,
   ArrowRight,
   UserName,

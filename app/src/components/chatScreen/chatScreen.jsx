@@ -5,8 +5,8 @@ import {
   Send,
   Bubble,
 } from "react-native-gifted-chat";
-import { View, Text, Image, TouchableOpacity } from "react-native";
-import styles from "../../../styles/pages.style";
+import { View, Text, Image, TouchableOpacity, Switch } from "react-native";
+import styles from "../../../styles/index.styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import images from "../../../constants/images";
 import {
@@ -22,10 +22,10 @@ import { retreiveAsyncData } from "../../store/asyncSlice";
 import CustomInputToolbar from "./CustomInputToolBar";
 import { Dropdown } from "react-native-element-dropdown";
 
-const transcriptType = [
-  { label: "Native", value: "native" },
-  { label: "Eng", value: "english" },
-];
+// const transcriptType = [
+//   { label: "Native", value: "native" },
+//   { label: "Eng", value: "english" },
+// ];
 
 const Chat = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -33,9 +33,13 @@ const Chat = ({ route, navigation }) => {
   const { activeChat, userData } = useSelector((state) => state.chatDataSlice);
   const { mobileNum, username } = useSelector((state) => state.asyncDataSlice);
   const [clearInput, setClearInput] = useState(false);
-  const [isFocus, setIsFocus] = useState(false);
-  const [value, setValue] = useState("native");
-  const [transcript, setTranscript] = useState("native");
+  // const [isFocus, setIsFocus] = useState(false);
+  // const [value, setValue] = useState("native");
+  // const [transcript, setTranscript] = useState("native");
+
+  const [transcriptEnabled, setTranscriptEnabled] = useState(false);
+  const toggleSwitch = () =>
+    setTranscriptEnabled((previousState) => !previousState);
 
   const { data, userType, roomId, chatType, linkType } = route?.params || "";
   const [chatData, setChatData] = useState(data);
@@ -50,14 +54,14 @@ const Chat = ({ route, navigation }) => {
   }, [roomId]);
   useEffect(() => {
     if (activeChat && activeChat.msg && activeChat.translatedMsg) {
-      if (transcript === "english") {
+      if (transcriptEnabled) {
         const sortedMessages = activeChat.translatedMsg.slice().sort((a, b) => {
           return new Date(b.createdAt) - new Date(a.createdAt);
         });
         sortedMessages.map((item) => {});
         setMessages(sortedMessages);
         setChatName(activeChat.username);
-      } else if (transcript === "native") {
+      } else {
         const sortedMessages = activeChat.msg.slice().sort((a, b) => {
           return new Date(b.createdAt) - new Date(a.createdAt);
         });
@@ -66,7 +70,7 @@ const Chat = ({ route, navigation }) => {
         setChatName(activeChat.username);
       }
     }
-  }, [transcript]);
+  }, [transcriptEnabled]);
 
   const handlelink = async () => {
     if (userType == "1") {
@@ -355,7 +359,7 @@ const Chat = ({ route, navigation }) => {
   useFocusEffect(
     React.useCallback(() => {
       if (activeChat && activeChat.msg && activeChat.translatedMsg) {
-        if (transcript === "english") {
+        if (transcriptEnabled) {
           const sortedMessages = activeChat.translatedMsg
             .slice()
             .sort((a, b) => {
@@ -364,7 +368,7 @@ const Chat = ({ route, navigation }) => {
           sortedMessages.map((item) => {});
           setMessages(sortedMessages);
           setChatName(activeChat.username);
-        } else if (transcript === "native") {
+        } else {
           const sortedMessages = activeChat.msg.slice().sort((a, b) => {
             return new Date(b.createdAt) - new Date(a.createdAt);
           });
@@ -379,7 +383,7 @@ const Chat = ({ route, navigation }) => {
     React.useCallback(() => {
       dispatch(retreiveAsyncData());
       if (activeChat && activeChat.msg && activeChat.translatedMsg) {
-        if (transcript === "english") {
+        if (transcriptEnabled) {
           const sortedMessages = activeChat.translatedMsg
             .slice()
             .sort((a, b) => {
@@ -388,7 +392,7 @@ const Chat = ({ route, navigation }) => {
           sortedMessages.map((item) => {});
           setMessages(sortedMessages);
           setChatName(activeChat.username);
-        } else if (transcript === "native") {
+        } else {
           const sortedMessages = activeChat.msg.slice().sort((a, b) => {
             return new Date(b.createdAt) - new Date(a.createdAt);
           });
@@ -453,58 +457,72 @@ const Chat = ({ route, navigation }) => {
 
   return (
     <React.Fragment>
-      <View style={styles.chatNavBar}>
-        <TouchableOpacity
-          onPress={() => {
-            setChatData();
-            navigation.navigate("main");
-          }}
-        >
-          <Image style={styles.navBackIcon} source={images.LeftArrowIcon} />
-        </TouchableOpacity>
-        {activeChat && <Text>{activeChat.username}</Text>}
-        <View style={styles.regDropdownContainer}>
-          <Dropdown
-            style={[styles.regDropdown, isFocus && { borderColor: "blue" }]}
-            placeholderStyle={styles.regPlaceholderStyle}
-            selectedTextStyle={styles.regSelectedTextStyle}
-            inputSearchStyle={styles.regInputSearchStyle}
-            iconStyle={styles.regIconStyle}
-            data={transcriptType}
-            maxHeight={300}
-            labelField="label"
-            valueField="value"
-            placeholder={!isFocus ? "   +   " : "  ...  "}
-            searchPlaceholder="Search"
-            value={value}
-            onFocus={() => setIsFocus(true)}
-            onBlur={() => setIsFocus(false)}
-            onChange={(item) => {
-              setTranscript(item.value);
-              setIsFocus(false);
+      <View style={styles.chatContainer}>
+        <View style={styles.chatNavBar}>
+          <TouchableOpacity
+            onPress={() => {
+              setChatData();
+              navigation.navigate("main");
             }}
-          />
-        </View>
-      </View>
-      {userType && (
-        <GiftedChat
-          messagesContainerStyle={{
-            backgroundColor: "white",
-            height: "100%",
-            paddingBottom: 70,
-          }}
-          renderUsernameOnMessage={true}
-          messages={messages}
-          onSend={(messages) => onSend(messages)}
-          showAvatarForEveryMessage={true}
-          renderAvatar={null}
-          // renderInputToolbar={(props) => customtInputToolbar(props)}
-          renderBubble={(props, index) => customBubbleContainer(props, index)}
-          renderInputToolbar={(props) => (
-            <CustomInputToolbar {...props} clearInput={clearInput} />
+          >
+            <Image style={styles.chatBackIcon} source={images.LeftArrowIcon} />
+          </TouchableOpacity>
+          {activeChat && (
+            <Text style={styles.chatName}>{activeChat.username}</Text>
           )}
-        />
-      )}
+          <View>
+            <Text style={styles.transSwitchText}>Transcript</Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#81b0ff" }}
+              thumbColor={transcriptEnabled ? "#f5dd4b" : "#f4f3f4"}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={toggleSwitch}
+              value={transcriptEnabled}
+            />
+          </View>
+          {/* <View style={styles.regDropdownContainer}>
+            <Dropdown
+              style={[styles.regDropdown, isFocus && { borderColor: "blue" }]}
+              placeholderStyle={styles.regPlaceholderStyle}
+              selectedTextStyle={styles.regSelectedTextStyle}
+              inputSearchStyle={styles.regInputSearchStyle}
+              iconStyle={styles.regIconStyle}
+              data={transcriptType}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={!isFocus ? "   +   " : "  ...  "}
+              searchPlaceholder="Search"
+              value={value}
+              onFocus={() => setIsFocus(true)}
+              onBlur={() => setIsFocus(false)}
+              onChange={(item) => {
+                setTranscript(item.value);
+                setIsFocus(false);
+              }}
+            />
+          </View> */}
+        </View>
+        {userType && (
+          <GiftedChat
+            messagesContainerStyle={{
+              backgroundColor: "white",
+              height: "100%",
+              paddingBottom: 70,
+            }}
+            renderUsernameOnMessage={true}
+            messages={messages}
+            onSend={(messages) => onSend(messages)}
+            showAvatarForEveryMessage={true}
+            renderAvatar={null}
+            // renderInputToolbar={(props) => customtInputToolbar(props)}
+            renderBubble={(props, index) => customBubbleContainer(props, index)}
+            renderInputToolbar={(props) => (
+              <CustomInputToolbar {...props} clearInput={clearInput} />
+            )}
+          />
+        )}
+      </View>
     </React.Fragment>
   );
 };

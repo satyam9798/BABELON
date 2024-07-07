@@ -1,20 +1,20 @@
 import React, { useState } from "react";
 import {
-  ImageBackground,
-  SafeAreaView,
   View,
   Text,
   TouchableOpacity,
   TextInput,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import images from "../../../constants/images";
-import styles from "../../../styles/pages.style";
-import { LinearGradient } from "expo-linear-gradient";
+import styles from "../../../styles/index.styles";
+// import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setUsernameAndLang } from "../../AppNavigator/services/apiServices";
 import { Dropdown } from "react-native-element-dropdown";
 import { getAsyncDetails, handleUserDetails } from "../../store/asyncSlice";
+import Toast from "react-native-simple-toast";
 
 import { useSelector, useDispatch } from "react-redux";
 
@@ -41,20 +41,26 @@ const ChooseLanguage = ({ navigation, route }) => {
   const [language, setlanguage] = useState("");
   const [value, setValue] = useState("");
   const [isFocus, setIsFocus] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { access, mobile } = route?.params;
   const dispatch = useDispatch();
 
   retrieveData();
   const nextScreen = () => {
+    setIsLoading(true);
     const postData = {
       username: userName,
       ssoToken: access,
     };
     setUsernameAndLang(postData)
       .then(async (response) => {
+        setIsLoading(false);
         if (response.ok) {
           await storeData(userName, language);
           navigation.navigate("main");
+        } else if (response.status === 401) {
+          Toast.show("Unable to process the request, please relogin");
+          navigation.navigate("RegistrationScreen");
         } else {
           setToastMsg("Username already exists");
           setShowToast(true);
@@ -107,75 +113,78 @@ const ChooseLanguage = ({ navigation, route }) => {
   };
 
   return (
-    <SafeAreaView>
-      <ImageBackground
-        source={images.BackgroundImage}
-        resizeMode="cover"
-        style={styles.container}
-      >
-        <LinearGradient
-          colors={["#373540", "#23202c"]}
-          locations={[0.5, 0.8]}
-          style={[styles.container, styles.bgOpacity]}
-        >
-          <View style={[styles.textContainer, styles.usernameBody]}>
-            <Text style={styles.regSmHeader}>
-              Select your{"\n"} Language and Username
-            </Text>
-            <View style={styles.languageContainer}>
-              <Text style={styles.userNameHeader}>Language</Text>
-              <View style={styles.dropdownContainer}>
-                {/* {renderLabel()} */}
-                <Dropdown
-                  style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  iconStyle={styles.iconStyle}
-                  data={languages}
-                  search
-                  maxHeight={300}
-                  labelField="label"
-                  valueField="value"
-                  placeholder={!isFocus ? "Select language" : "..."}
-                  searchPlaceholder="Search..."
-                  value={value}
-                  onFocus={() => setIsFocus(true)}
-                  onBlur={() => setIsFocus(false)}
-                  onChange={(item) => {
-                    setlanguage(item.value);
-                    setIsFocus(false);
-                  }}
-                />
-              </View>
-            </View>
-            <View style={styles.languageContainer}>
-              <Text style={styles.userNameHeader}>Username</Text>
-              <View style={styles.userNameInput}>
-                <Image style={styles.usernameIcon} source={images.UserName} />
-                <TextInput
-                  style={styles.userNameTextInput}
-                  onChangeText={(text) => setuserName(text)}
-                  value={userName}
-                  placeholder="Enter your username"
-                />
-              </View>
-            </View>
+    // <SafeAreaView>
+    //   <ImageBackground
+    //     source={images.BackgroundImage}
+    //     resizeMode="cover"
+    //     style={styles.container}
+    //   >
+    //     <LinearGradient
+    //       colors={["#373540", "#23202c"]}
+    //       locations={[0.5, 0.8]}
+    //       style={[styles.container, styles.bgOpacity]}
+    //     >
+    <View style={[styles.languagePageContainer]}>
+      <View style={[styles.textContainer, styles.usernameBody]}>
+        <View style={{ display: "flex", flexDirection: "row" }}>
+          <Image style={styles.registrationIcon} source={images.Lang} />
+          <Image style={styles.registrationIcon} source={images.Earth} />
+        </View>
+        <Text style={styles.regSmHeader}>
+          Select your{"\n"} Language and Username
+        </Text>
+        <View style={styles.languageContainer}>
+          <Text style={styles.userNameHeader}>Username</Text>
+          <View style={styles.userNameInput}>
+            <Image style={styles.usernameIcon} source={images.UserName} />
+            <TextInput
+              style={styles.userNameTextInput}
+              onChangeText={(text) => setuserName(text)}
+              value={userName}
+              placeholder="Enter your username"
+            />
           </View>
-
-          <TouchableOpacity
-            style={
-              isDisabled()
-                ? styles.disabledUserNameBtn
-                : styles.langConfirmationBtn
-            }
-            onPress={nextScreen}
-          >
-            <Text style={styles.RegBtnText}>Submit</Text>
-          </TouchableOpacity>
-        </LinearGradient>
-      </ImageBackground>
-    </SafeAreaView>
+        </View>
+        <View style={styles.languageContainer}>
+          <Text style={styles.userNameHeader}>Language</Text>
+          <View style={styles.dropdownContainer}>
+            {/* {renderLabel()} */}
+            <Dropdown
+              style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              inputSearchStyle={styles.inputSearchStyle}
+              iconStyle={styles.iconStyle}
+              data={languages}
+              search
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={!isFocus ? "Select language" : "..."}
+              searchPlaceholder="Search..."
+              value={value}
+              onFocus={() => setIsFocus(true)}
+              onBlur={() => setIsFocus(false)}
+              onChange={(item) => {
+                setlanguage(item.value);
+                setIsFocus(false);
+              }}
+            />
+          </View>
+        </View>
+      </View>
+      {isLoading && <ActivityIndicator size="large" color="#ef8354" />}
+      <TouchableOpacity
+        style={isDisabled() ? styles.verifyDisabledButton : styles.verifyButton}
+        disabled={isDisabled()}
+        onPress={nextScreen}
+      >
+        <Text style={styles.RegBtnText}>Submit</Text>
+      </TouchableOpacity>
+    </View>
+    //     </LinearGradient>
+    //   </ImageBackground>
+    // </SafeAreaView>
   );
 };
 export default ChooseLanguage;
