@@ -536,15 +536,27 @@ const styles = StyleSheet.create({
     },
     newChatButton: {
         position: 'absolute',
-        right: 30,
+        right: 80,
         bottom: 30,
         backgroundColor: COLORS.orangeCol,
-        width: 55,
-        height: 55,
+        width: 50,
+        height: 50,
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
     },
+    settingsButton: {
+        position: 'absolute',
+        right: 20,
+        bottom: 30,
+        backgroundColor: COLORS.grey,
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
     // chat list on main screen
     ChatlistContainer: {
         overflow: "scroll",
@@ -647,7 +659,131 @@ const styles = StyleSheet.create({
         height: 40,
         width: 40,
         borderRadius: 50
-    }
+    },
+    //settings page
+    settings: {
+        flex: 1,
+    },
+    settingsNavbar: {
+        width: "100%",
+        height: 55,
+        backgroundColor: COLORS.orangeCol,
+        marginBottom: "5%",
+        justifyContent: 'start',
+        alignItems: "center",
+        paddingHorizontal: '3%',
+        flexDirection: "row"
+    },
+    settingsNavbarText: {
+        fontSize: SIZES.xLarge,
+        color: COLORS.white,
+        fontWeight: '500',
+    },
+    settingsBackIcon: {
+        height: 35,
+        width: 35,
+        marginBottom: 10,
+        marginHorizontal: 4,
+        marginRight: 15
+    },
+    profileContainer: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: COLORS.white,
+        marginHorizontal: 10,
+        borderRadius: 10,
+    },
+    settingsProfile: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 100,
+        padding: 10,
+        backgroundColor: COLORS.white,
+        marginHorizontal: 10,
+        borderRadius: 10,
+    },
+    settingsImageContainer: {
+        width: 70,
+        height: 70,
+        backgroundColor: COLORS.grey,
+        borderRadius: 50,
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    settingsImage: {
+        width: 55,
+        height: 55,
+    },
+    settingsTextContainer: {
+        flex: 1,
+        marginHorizontal: 25
+    },
+    settingsUsername: {
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    settingsMobileNumber: {
+        fontSize: 14,
+        color: '#666',
+    },
+    personalContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
+    sectionContainer: {
+        width: "100%",
+        height: "100%",
+        flexDirection: 'column',
+        marginVertical: 20,
+        marginHorizontal: 20,
+        paddingHorizontal: 20,
+        backgroundColor: COLORS.white,
+        marginHorizontal: 10,
+        borderRadius: 10,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 20,
+    },
+    detailRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 5,
+    },
+    detailLabel: {
+        fontSize: 15,
+        fontWeight: 'bold',
+    },
+    detailValue: {
+        fontSize: 15,
+    },
+    separator: {
+        height: 1,
+        backgroundColor: COLORS.grey,
+        marginVertical: 10,
+    },
+    collapsibleHeader: {
+        flexDirection: 'row',
+        justifyContent: "space-between",
+        alignItems: 'center',
+        paddingVertical: 10,
+    },
+    arrowIcon: {
+        width: 20,
+        height: 20,
+        marginRight: 10,
+    },
+    collapsibleContent: {
+        paddingLeft: 10,
+        paddingTop: 10,
+    },
+    privacyPoint: {
+        fontSize: 14,
+        marginBottom: 8,
+        color: COLORS.grey,
+    },
 });
 
 export default styles;

@@ -141,6 +141,7 @@ const ChooseLanguage = ({ navigation, route }) => {
               style={styles.userNameTextInput}
               onChangeText={(text) => setuserName(text)}
               value={userName}
+              maxLength={20}
               placeholder="Enter your username"
             />
           </View>

@@ -108,14 +108,6 @@ const MainScreen = ({ navigation }) => {
         <View>
           <Text style={styles.NavbarText}>Chats</Text>
         </View>
-        {/* <View style={styles.NavbarIconTab}>
-          <View style={styles.NavbarIcon}>
-            <TouchableOpacity onPress={CreateChatHandle}>
-              <Image style={styles.plusIcon} source={images.CreateIcon} />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.NavbarIcon}></View>
-        </View> */}
       </View>
       <View style={styles.MainSearchInput}>
         <TextInput
@@ -170,6 +162,14 @@ const MainScreen = ({ navigation }) => {
       )}
       <TouchableOpacity style={styles.newChatButton} onPress={CreateChatHandle}>
         <Image style={styles.plusIcon} source={images.Pencil} />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.settingsButton}
+        onPress={() => {
+          navigation.navigate("settings");
+        }}
+      >
+        <Image style={styles.plusIcon} source={images.Settings} />
       </TouchableOpacity>
     </View>
     // {/* <SocketEventHandler /> */}

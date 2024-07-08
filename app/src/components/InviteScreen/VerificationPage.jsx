@@ -95,9 +95,14 @@ const VerificationPage = ({ navigation, route }) => {
       .then((response) => {
         setIsLoading(false);
         if (response.status == 200) {
-          response.json().then((body) => {
+          response.json().then(async (body) => {
+            const oldMobile = await AsyncStorage.getItem("mobileNum");
+            if (oldMobile === mobileNum) {
+              AsyncStorage.removeItem("userData");
+            }
             setToken(body.access);
             storeData(body);
+
             navigation.navigate("language", {
               access: body.access,
               mobile: mobileNum,

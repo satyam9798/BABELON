@@ -16,12 +16,12 @@ import CountryPicker from "react-native-country-picker-modal";
 // import { LinearGradient } from "expo-linear-gradient";
 import AnimatedLoader from "react-native-animated-loader";
 
-const countryCode = [
-  { label: "+91", value: "+91" },
-  { label: "+1", value: "+1" },
-  { label: "+49", value: "+49" },
-  { label: "+81", value: "+81" },
-];
+// const countryCode = [
+//   { label: "+91", value: "+91" },
+//   { label: "+1", value: "+1" },
+//   { label: "+49", value: "+49" },
+//   { label: "+81", value: "+81" },
+// ];
 
 const RegistrationScreen = ({ navigation }) => {
   const [input, setInput] = useState("");

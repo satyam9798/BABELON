@@ -8,6 +8,10 @@ import Pencil from "../../assets/images/logos/pencil.png";
 import Group from "../../assets/images/logos/group.png";
 import Single from "../../assets/images/logos/single.png";
 import Send from "../../assets/images/logos/sendInput.png";
+import Settings from "../../assets/images/logos/settings.png";
+import ArrowUp from "../../assets/images/logos/arrow-up.png";
+import ArrowDown from "../../assets/images/logos/arrow-down.png";
+import Edit from "../../assets/images/logos/edit.png";
 
 import QrImage from "../../assets/images/qrCode.png";
 import ArrowRight from "../../assets/images/right-arrow.png";
@@ -38,6 +42,11 @@ export default {
   Group,
   Single,
   Send,
+  Settings,
+  ArrowDown,
+  ArrowUp,
+  Edit,
+
   QrImage,
   ArrowRight,
   UserName,

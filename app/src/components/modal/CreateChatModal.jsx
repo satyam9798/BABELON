@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, Modal, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  Modal,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import styles from "../../../styles/pages.style";
 import images from "../../../constants/images";
 import { RadioButton } from "react-native-paper";
@@ -17,8 +24,10 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
   const dispatch = useDispatch();
   const [linkType, setLinkType] = useState("temporary");
   const [chatType, setChatType] = useState("single");
+  const [isLoading, setIsLoading] = useState(false);
 
   const createLink = async () => {
+    setIsLoading(true);
     const access = await AsyncStorage.getItem("access");
 
     if (chatType === "single") {
@@ -61,6 +70,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                 timestamp: formattedDate,
               };
               dispatch(saveData({ data: data, chatType: chatType }));
+              setIsLoading(false);
               navigation.navigate("linkShare", { link: link, data: data });
 
               closeModal();
@@ -222,6 +232,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
               alignItems: "center",
             }}
           >
+            {isLoading && <ActivityIndicator size="large" color="#ef8354" />}
             <TouchableOpacity style={styles.chatLinkBtn} onPress={createLink}>
               <Text style={styles.chatLinkBtnText}>Create Link</Text>
             </TouchableOpacity>

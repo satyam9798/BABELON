@@ -821,11 +821,11 @@ const styles = StyleSheet.create({
   chatLinkBtn: {
     mmarginHorizontal: 15,
     marginVertical: 20,
-    width: "55%",
+    width: "75%",
     height: 35,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 50,
+    borderRadius: 5,
     backgroundColor: COLORS.orangeCol,
   },
   disabledChatLinkBtn: {
@@ -839,8 +839,7 @@ const styles = StyleSheet.create({
   },
   chatLinkBtnText: {
     fontSize: SIZES.medium,
-    color: COLORS.black,
-    // fontFamily: FONTS.bold,
+    color: COLORS.white,
     fontWeight: "600",
   },
   // dropdown language

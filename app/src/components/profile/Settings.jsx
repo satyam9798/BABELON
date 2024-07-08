@@ -1,117 +1,120 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
+import Collapsible from "react-native-collapsible";
+import styles from "../../../styles/index.styles";
+import images from "../../../constants/images";
+import { useSelector } from "react-redux";
 
-const SettingsPage = () => {
-  const [username, setUsername] = useState("");
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [language, setLanguage] = useState("");
+const languages = [
+  { label: "Assamese", value: "as" },
+  { label: "Bengali", value: "bn" },
+  { label: "English", value: "en" },
+  { label: "Gujarati", value: "gu" },
+  { label: "Hindi", value: "hi" },
+  { label: "Kannada", value: "kn" },
+  { label: "Malayalam", value: "ml" },
+  { label: "Marathi", value: "mr" },
+  { label: "Odia (Oriya)", value: "or" },
+  { label: "Punjabi (Gurmukhi)", value: "pa" },
+  { label: "Tamil", value: "ta" },
+  { label: "Telugu", value: "te" },
+  { label: "Urdu", value: "ur" },
+];
+
+const SettingsPage = ({ navigation }) => {
   const [isPrivacyCollapsed, setIsPrivacyCollapsed] = useState(true);
+  const { mobileNum, username, language } = useSelector(
+    (state) => state.asyncDataSlice
+  );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const storedUsername = await AsyncStorage.getItem("username");
-      const storedMobileNumber = await AsyncStorage.getItem("mobileNumber");
-      const storedLanguage = await AsyncStorage.getItem("language");
-
-      setUsername(storedUsername || "");
-      setMobileNumber(storedMobileNumber || "");
-      setLanguage(storedLanguage || "");
-    };
-
-    fetchData();
-  }, []);
+  const getLanguageLabel = (value) => {
+    const language = languages.find((lang) => lang.value === value);
+    return language ? language.label : value;
+  };
 
   return (
     <ScrollView style={styles.settings}>
       <View style={styles.settingsSection}>
-        <Text style={styles.settingsSectionTitle}>Profile</Text>
-        <View style={styles.item}>
-          <Text style={styles.label}>Username:</Text>
-          <Text style={styles.value}>{username}</Text>
-        </View>
-        <View style={styles.item}>
-          <Text style={styles.label}>Mobile Number:</Text>
-          <Text style={styles.value}>{mobileNumber}</Text>
-        </View>
-        <View style={styles.item}>
-          <Text style={styles.label}>Language:</Text>
-          <Text style={styles.value}>{language}</Text>
-        </View>
-      </View>
-
-      <View style={styles.settingsSection}>
-        <Text style={styles.settingsSectionTitle}>Privacy</Text>
-        <TouchableOpacity
-          style={styles.settingsAccordionHeader}
-          onPress={() => setIsPrivacyCollapsed(!isPrivacyCollapsed)}
-        >
-          <Text style={styles.settingsAccordionHeaderText}>
-            Terms and Conditions
-          </Text>
-        </TouchableOpacity>
-        {/* <Collapsible collapsed={isPrivacyCollapsed}>
-          <View style={styles.accordionContent}>
-            <Text style={styles.accordionText}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Text>
+        <View style={styles.settingsNavbar}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("main");
+            }}
+          >
+            <Image
+              style={styles.settingsBackIcon}
+              source={images.LeftArrowIcon}
+            />
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.settingsNavbarText}>Settings</Text>
           </View>
-        </Collapsible> */}
+        </View>
+        <View style={styles.profileContainer}>
+          <View style={styles.settingsProfile}>
+            <View style={styles.settingsImageContainer}>
+              <Image source={images.Single} style={styles.settingsImage} />
+            </View>
+            <View style={styles.settingsTextContainer}>
+              <Text style={styles.settingsUsername}>{username}</Text>
+              <Text style={styles.settingsMobileNumber}>{mobileNum}</Text>
+            </View>
+          </View>
+          <View style={styles.sectionContainer}>
+            <View style={styles.personalContainer}>
+              <Text style={styles.sectionTitle}>Personal Details</Text>
+              <TouchableOpacity>
+                <Image source={images.Edit} style={styles.arrowIcon} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Username:</Text>
+              <Text style={styles.detailValue}>{username}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Mobile:</Text>
+              <Text style={styles.detailValue}>{mobileNum}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Language:</Text>
+              <Text style={styles.detailValue}>
+                {getLanguageLabel(language)}
+              </Text>
+            </View>
+            <View style={styles.separator} />
+            <TouchableOpacity
+              onPress={() => setIsPrivacyCollapsed(!isPrivacyCollapsed)}
+              style={styles.collapsibleHeader}
+            >
+              <Text style={styles.sectionTitle}>Terms and Conditions</Text>
+              <Image
+                source={isPrivacyCollapsed ? images.ArrowDown : images.ArrowUp}
+                style={styles.arrowIcon}
+              />
+            </TouchableOpacity>
+            <Collapsible collapsed={isPrivacyCollapsed}>
+              <View style={styles.collapsibleContent}>
+                <Text style={styles.privacyPoint}>
+                  • All data is stored locally on your device, not on our
+                  servers
+                </Text>
+                <Text style={styles.privacyPoint}>
+                  • Regular security audits ensure your data remains safe
+                </Text>
+                <Text style={styles.privacyPoint}>
+                  • You have full control over your data and can delete it at
+                  any time
+                </Text>
+                <Text style={styles.privacyPoint}>
+                  • We do not share your personal information with third parties
+                </Text>
+              </View>
+            </Collapsible>
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  settings: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  settingsSection: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
-  },
-  settingsSectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  item: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  label: {
-    fontSize: 16,
-    color: "#333",
-  },
-  value: {
-    fontSize: 16,
-    color: "#666",
-  },
-  settingsAccordionHeader: {
-    paddingVertical: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  settingsAccordionHeaderText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  accordionContent: {
-    paddingVertical: 12,
-  },
-  accordionText: {
-    fontSize: 14,
-    color: "#666",
-  },
-});
 
 export default SettingsPage;
