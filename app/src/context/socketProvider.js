@@ -1,10 +1,10 @@
 import React, { createContext, useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getAsyncDetails } from "../store/asyncSlice";
-import { retreiveData, saveMessage } from "../store/dataSlice";
+import { retreiveData, saveMessage, saveGroupMembers, updateGroupDetails } from "../store/dataSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-simple-toast";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import ReconnectingWebSocket from "reconnecting-websocket";
 
 const WebSocketContext = createContext(null);
@@ -13,23 +13,35 @@ const WebSocketProvider = ({ children }) => {
   const navigation = useNavigation();
   const ws = useRef(null);
   const dispatch = useDispatch();
-  const { language, mobileNum } = useSelector((state) => state.asyncDataSlice);
+  const { language, mobileNum, websocketToken } = useSelector((state) => state.asyncDataSlice);
   const [socket, setSocket] = useState(null);
   useEffect(() => {
-    if (language != null && mobileNum != null) {
+    console.log(language, mobileNum, websocketToken);
+    if (language != null && mobileNum != null && websocketToken != null) {
       connectWebSocket();
     }
-  }, [language, mobileNum]);
+  }, [language, mobileNum, websocketToken]);
 
-  useEffect(() => {
-    dispatch(getAsyncDetails());
-    return () => {
-      console.log("Unmouting web socket");
-      if (socket) {
-        socket.close();
-      }
-    };
-  }, []);
+  // useEffect(() => {
+  //   dispatch(getAsyncDetails());
+  //   return () => {
+  //     console.log("Unmouting web socket");
+  //     // if (socket) {
+  //     ws.current.close();
+  //     // }
+  //   };
+  // }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(getAsyncDetails());
+      return () => {
+        console.log("Unmouting web socket");
+        // if (socket) {
+        ws.current.close();
+        // }
+      };
+    }, [])
+  );
   const connectWebSocket = async () => {
     const asyncUsername = await AsyncStorage.getItem("username");
     const asyncLanguage = await AsyncStorage.getItem("language");
@@ -44,6 +56,7 @@ const WebSocketProvider = ({ children }) => {
     );
     setSocket(ws.current);
     const webToken = await AsyncStorage.getItem("websocket_token");
+    // console.log("connecting to websocket", ws.current);
     ws.current.onopen = () => {
       const initiateSocket = {
         type: "token",
@@ -62,21 +75,31 @@ const WebSocketProvider = ({ children }) => {
       sendData(JSON.stringify(checkMsg));
     };
     ws.current.onclose = (e) => {
-      console.warn("web socket connection closed", e);
+      // console.warn("web socket connection closed", e);
     };
     ws.current.onerror = (e) => {
-      console.warn("web socket error occured", e);
+      // console.warn("web socket error occured", e);
     };
     ws.current.onmessage = (e) => {
       const msg = JSON.parse(e.data);
+      console.log("msg", msg)
       if (msg?.type == "invalid_user") {
       }
       if (msg?.type == "token") {
         // handle token messages
       } else if (msg?.type == "user_chats") {
-        // handle user_chats messages
+        // handle members in a group
+        if (!isObjectEmpty(msg?.message.groups)) {
+          dispatch(saveGroupMembers(msg?.message.groups));
+        }
+
+      }
+      else if (msg?.type == "group_details_update") {
+        // handle details update in a group
+        console.log("updated details", msg?.message);
+        dispatch(updateGroupDetails(msg?.message));
+
       } else if (msg?.type == "message") {
-        console.log("msg", msg.message)
         if (msg?.message?.request_id) {
           const payload = {
             roomId: msg.message?.request_id,
@@ -108,6 +131,9 @@ const WebSocketProvider = ({ children }) => {
     } else {
     }
   };
+  function isObjectEmpty(obj) {
+    return Object.keys(obj).length === 0;
+  }
 
   return (
     <WebSocketContext.Provider value={ws.current}>

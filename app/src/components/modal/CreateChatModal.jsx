@@ -122,6 +122,8 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                 username: username,
                 msg: [],
                 translatedMsg: [],
+                description: "Group description",
+                members: [],
 
                 timestamp: formattedDate,
               };

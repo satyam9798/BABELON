@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "7211493811",
+    "project_id": "babylon-137f6",
+    "storage_bucket": "babylon-137f6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:7211493811:android:e668374580decb4ccf03c6",
+        "android_client_info": {
+          "package_name": "com.anonymous.BabelOn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArEQwV4D3O0eKb2yP4m7Z3wAdoen4jEVU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

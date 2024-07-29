@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from "react-native";
-// import styles from "../../../styles/pages.style";
 import styles from "../../../styles/index.styles";
 import images from "../../../constants/images";
 import {
@@ -19,16 +18,11 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../../../constants/theme";
+import { useSelector, useDispatch } from "react-redux";
+import { getAsyncDetails, handleToken } from "../../store/asyncSlice";
 
 const VerificationPage = ({ navigation, route }) => {
-  // const [input_1, setInput_1] = useState("");
-  // const [input_2, setInput_2] = useState("");
-  // const [input_3, setInput_3] = useState("");
-  // const [input_4, setInput_4] = useState("");
-  // const input1Ref = useRef(null);
-  // const input2Ref = useRef(null);
-  // const input3Ref = useRef(null);
-  // const input4Ref = useRef(null);
+  const dispatch = useDispatch();
 
   const [minutes, setMinutes] = useState(1);
   const [seconds, setSeconds] = useState(59);
@@ -97,8 +91,14 @@ const VerificationPage = ({ navigation, route }) => {
         if (response.status == 200) {
           response.json().then(async (body) => {
             const oldMobile = await AsyncStorage.getItem("mobileNum");
-            if (oldMobile === mobileNum) {
-              AsyncStorage.removeItem("userData");
+            console.log("old no:", oldMobile, "new mob:", mobileNum);
+            if (oldMobile != mobileNum) {
+              console.log("Deleting data as registering with new number");
+              await AsyncStorage.removeItem("userData");
+              await AsyncStorage.removeItem("mobileNum");
+              await AsyncStorage.removeItem("access");
+              await AsyncStorage.removeItem("language");
+              dispatch(getAsyncDetails());
             }
             setToken(body.access);
             storeData(body);
@@ -119,11 +119,18 @@ const VerificationPage = ({ navigation, route }) => {
   async function storeData(data) {
     try {
       if (data) {
-        await AsyncStorage.setItem("access", data.access);
-        await AsyncStorage.setItem("websocket_token", data.websocket_token);
-        await AsyncStorage.setItem("mobileNum", mobileNum);
+        dispatch(
+          handleToken({
+            access: data.access,
+            websocketToken: data.websocket_token,
+            mobileNum,
+          })
+        );
+        //   await AsyncStorage.setItem("access", data.access);
+        //   await AsyncStorage.setItem("websocket_token", data.websocket_token);
+        //   await AsyncStorage.setItem("mobileNum", mobileNum);
       }
-      const asyncUsername = await AsyncStorage.getItem("username");
+      // const asyncUsername = await AsyncStorage.getItem("username");
     } catch (error) {
       console.error("Failed to store SSO token:", error);
     }

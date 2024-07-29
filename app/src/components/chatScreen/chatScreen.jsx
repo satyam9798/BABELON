@@ -5,9 +5,18 @@ import {
   Send,
   Bubble,
 } from "react-native-gifted-chat";
-import { View, Text, Image, TouchableOpacity, Switch } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Switch,
+  TextInput,
+  FlatList,
+} from "react-native";
 import styles from "../../../styles/index.styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import images from "../../../constants/images";
 import {
   acceptRequest,
@@ -20,12 +29,6 @@ import { saveMessage, saveData, setActiveChat } from "../../store/dataSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { retreiveAsyncData } from "../../store/asyncSlice";
 import CustomInputToolbar from "./CustomInputToolBar";
-import { Dropdown } from "react-native-element-dropdown";
-
-// const transcriptType = [
-//   { label: "Native", value: "native" },
-//   { label: "Eng", value: "english" },
-// ];
 
 const Chat = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -33,9 +36,9 @@ const Chat = ({ route, navigation }) => {
   const { activeChat, userData } = useSelector((state) => state.chatDataSlice);
   const { mobileNum, username } = useSelector((state) => state.asyncDataSlice);
   const [clearInput, setClearInput] = useState(false);
-  // const [isFocus, setIsFocus] = useState(false);
-  // const [value, setValue] = useState("native");
-  // const [transcript, setTranscript] = useState("native");
+  // const [modalVisible, setModalVisible] = useState(false);
+  // const [scrollOffset, setScrollOffset] = useState(null);
+  // const [isLoading, setIsLoading] = useState(false);
 
   const [transcriptEnabled, setTranscriptEnabled] = useState(false);
   const toggleSwitch = () =>
@@ -195,6 +198,8 @@ const Chat = ({ route, navigation }) => {
                 username: `group${roomId}`,
                 msg: [],
                 translatedMsg: [],
+                description: "Group description",
+                members: [],
                 timestamp: formattedDate,
               };
               dispatch(saveData({ data: setData, chatType: chatType }));
@@ -468,7 +473,19 @@ const Chat = ({ route, navigation }) => {
             <Image style={styles.chatBackIcon} source={images.LeftArrowIcon} />
           </TouchableOpacity>
           {activeChat && (
-            <Text style={styles.chatName}>{activeChat.username}</Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("chatDetails", {
+                  data,
+                  userType,
+                  roomId,
+                  chatType,
+                  linkType,
+                });
+              }}
+            >
+              <Text style={styles.chatName}>{activeChat.username}</Text>
+            </TouchableOpacity>
           )}
           <View>
             <Text style={styles.transSwitchText}>Transcript</Text>
@@ -504,23 +521,32 @@ const Chat = ({ route, navigation }) => {
           </View> */}
         </View>
         {userType && (
-          <GiftedChat
-            messagesContainerStyle={{
-              backgroundColor: "white",
-              height: "100%",
-              paddingBottom: 70,
-            }}
-            renderUsernameOnMessage={true}
-            messages={messages}
-            onSend={(messages) => onSend(messages)}
-            showAvatarForEveryMessage={true}
-            renderAvatar={null}
-            // renderInputToolbar={(props) => customtInputToolbar(props)}
-            renderBubble={(props, index) => customBubbleContainer(props, index)}
-            renderInputToolbar={(props) => (
-              <CustomInputToolbar {...props} clearInput={clearInput} />
-            )}
-          />
+          <>
+            <GiftedChat
+              messagesContainerStyle={{
+                backgroundColor: "white",
+                height: "100%",
+                paddingBottom: 70,
+              }}
+              renderUsernameOnMessage={true}
+              messages={messages}
+              onSend={(messages) => onSend(messages)}
+              showAvatarForEveryMessage={true}
+              renderAvatar={null}
+              // alwaysShowSend={true}
+              // renderInputToolbar={(props) => customtInputToolbar(props)}
+              renderBubble={(props, index) =>
+                customBubbleContainer(props, index)
+              }
+              renderInputToolbar={(props) => (
+                <CustomInputToolbar
+                  {...props}
+                  members={activeChat.members}
+                  clearInput={clearInput}
+                />
+              )}
+            />
+          </>
         )}
       </View>
     </React.Fragment>

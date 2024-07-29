@@ -9,6 +9,8 @@ const COLORS = {
   textInput: "#f3f3f3",
   btnBorder: "#D3D3D3",
   backdrop: "rgba(206, 213, 224, 0.6)",
+  tempBackground: "#92a8d1",
+  permanentBackground: "#eea29a",
 };
 const FONTS = {
   regular: "Tahoma, sans-serif",

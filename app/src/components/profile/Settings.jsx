@@ -4,6 +4,8 @@ import Collapsible from "react-native-collapsible";
 import styles from "../../../styles/index.styles";
 import images from "../../../constants/images";
 import { useSelector } from "react-redux";
+import * as Clipboard from "expo-clipboard";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const languages = [
   { label: "Assamese", value: "as" },
@@ -26,6 +28,18 @@ const SettingsPage = ({ navigation }) => {
   const { mobileNum, username, language } = useSelector(
     (state) => state.asyncDataSlice
   );
+  //added for dev env for fcm token
+  const [fcmToken, setFcmToken] = useState(null);
+  useEffect(() => {
+    getData();
+  });
+  const getData = async () => {
+    await getFcmToken();
+  };
+  async function getFcmToken() {
+    const data = await AsyncStorage.getItem("fcmToken");
+    setFcmToken(data);
+  }
 
   const getLanguageLabel = (value) => {
     const language = languages.find((lang) => lang.value === value);
@@ -74,6 +88,16 @@ const SettingsPage = ({ navigation }) => {
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Mobile:</Text>
               <Text style={styles.detailValue}>{mobileNum}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>FCM Token:</Text>
+              <TouchableOpacity
+                onPress={async () => {
+                  await Clipboard.setStringAsync(fcmToken);
+                }}
+              >
+                <Text style={styles.detailValue}>{fcmToken}</Text>
+              </TouchableOpacity>
             </View>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Language:</Text>

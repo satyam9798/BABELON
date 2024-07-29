@@ -5,9 +5,8 @@ export const handleToken = createAsyncThunk(
   "handleToken",
   async (req, { fulfillWithValue, rejectWithValue }) => {
     try {
-      console.log("data handle", req);
       await AsyncStorage.setItem("access", req.access);
-      await AsyncStorage.setItem("access", req.websocketToken);
+      await AsyncStorage.setItem("websocket_token", req.websocketToken);
       await AsyncStorage.setItem("mobileNum", req.mobileNum);
       const asyncMobileNum = await AsyncStorage.getItem("mobileNum");
       const asyncToken = await AsyncStorage.getItem("access");
@@ -16,6 +15,22 @@ export const handleToken = createAsyncThunk(
         mobileNum: asyncMobileNum,
         token: asyncToken,
         websocketToken: asyncWebsocketToken,
+      };
+      return fulfillWithValue(response);
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+export const handleFcmToken = createAsyncThunk(
+  "handleFcmToken",
+  async (req, { fulfillWithValue, rejectWithValue }) => {
+    try {
+      // await AsyncStorage.setItem("fcmToken", req.fcmToken);
+      const fcmToken = await AsyncStorage.getItem("fcmToken");
+      const response = {
+        fcmToken: fcmToken,
       };
       return fulfillWithValue(response);
     } catch (error) {
@@ -108,6 +123,7 @@ const asyncDataSlice = createSlice({
     username: null,
     websocketToken: null,
     fetchStatus: "",
+    fcmToken: null
   },
   reducers: {
     getAsyncDetails: (state, action) => { },
@@ -126,6 +142,16 @@ const asyncDataSlice = createSlice({
       state.fetchStatus = "Loading...";
     });
     builder.addCase(getAsyncDetails.rejected, (state) => {
+      state.fetchStatus = "error";
+    });
+    builder.addCase(handleFcmToken.fulfilled, (state, action) => {
+      state.fcmToken = action.payload.fcmToken;
+      state.fetchStatus = "Success";
+    });
+    builder.addCase(handleFcmToken.pending, (state) => {
+      state.fetchStatus = "Loading...";
+    });
+    builder.addCase(handleFcmToken.rejected, (state) => {
       state.fetchStatus = "error";
     });
     builder.addCase(handleToken.fulfilled, (state, action) => {

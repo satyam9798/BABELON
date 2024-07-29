@@ -120,8 +120,69 @@ export const saveMessage = createAsyncThunk(
     }
   }
 );
+
+export const saveGroupMembers = createAsyncThunk(
+  "saveGroupMembers",
+  async (req, { fulfillWithValue, rejectWithValue }) => {
+    try {
+      const existingData = await AsyncStorage.getItem("userData");
+      if (!existingData) {
+        console.error("No existing data found");
+        return;
+      }
+      let userData = JSON.parse(existingData);
+
+      for await (const [key, value] of Object.entries(req)) {
+        const index = userData["group"].findIndex(
+          (item) => item.roomId == key
+        );
+        if (index === -1) {
+          console.error("No object found with the given roomId");
+          return;
+        }
+        userData["group"][index].members = req[key].members;
+      }
+      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+      const updatedData = await AsyncStorage.getItem("userData");
+      return fulfillWithValue(updatedData);
+    } catch (error) {
+      console.log("error", error)
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+export const updateGroupDetails = createAsyncThunk(
+  "updateGroupDetails",
+  async (req, { fulfillWithValue, rejectWithValue }) => {
+    try {
+
+      const existingData = await AsyncStorage.getItem("userData");
+      if (!existingData) {
+        console.error("No existing data found");
+        return;
+      }
+      let userData = JSON.parse(existingData);
+      const index = userData["group"].findIndex(
+        (item) => item.roomId == req.group_id
+      );
+      if (index === -1) {
+        console.error("No object found with the given roomId");
+        return;
+      }
+      userData["group"][index].username = req.group_name;
+      userData["group"][index].description = req.group_description;
+      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+      const updatedData = await AsyncStorage.getItem("userData");
+      return fulfillWithValue(updatedData);
+    } catch (error) {
+      console.log("error", error)
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+
 export const saveStatus = createAsyncThunk(
-  "saveMessage",
+  "saveStatus",
   async (req, { fulfillWithValue, rejectWithValue }) => {
     try {
       const existingData = await AsyncStorage.getItem("userData");
@@ -186,6 +247,30 @@ const chatDataSlice = createSlice({
     });
     builder.addCase(saveData.rejected, (state) => {
       console.log("rejected saveData");
+      state.fetchStatus = "Error";
+    });
+    builder.addCase(saveGroupMembers.fulfilled, (state, action) => {
+      state.userData = action.payload;
+      state.fetchStatus = "Success";
+    });
+    builder.addCase(saveGroupMembers.pending, (state) => {
+      console.log("pending saveData");
+      state.fetchStatus = "Loading...";
+    });
+    builder.addCase(saveGroupMembers.rejected, (state) => {
+      console.log("rejected saveGroupMembers");
+      state.fetchStatus = "Error";
+    });
+    builder.addCase(updateGroupDetails.fulfilled, (state, action) => {
+      state.userData = action.payload;
+      state.fetchStatus = "Success";
+    });
+    builder.addCase(updateGroupDetails.pending, (state) => {
+      console.log("pending saveData");
+      state.fetchStatus = "Loading...";
+    });
+    builder.addCase(updateGroupDetails.rejected, (state) => {
+      console.log("rejected saveGroupMembers");
       state.fetchStatus = "Error";
     });
     builder.addCase(saveMessage.fulfilled, (state, action) => {

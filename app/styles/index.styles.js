@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { COLORS, FONTS, SIZES } from "../constants/theme";
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
 const styles = StyleSheet.create({
     //welcome screen css
@@ -784,6 +785,215 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         color: COLORS.grey,
     },
+    // chat tag user
+    modalContainer: {
+        // width: "100%",
+        position: 'absolute',
+        bottom: 10, // Give bottom as per your requirement here I have given with keyboard height and composer input height
+        justifyContent: 'flex-end',
+        alignSelf: 'center',
+        margin: 0,
+        ...Platform.select({
+            android: {
+                marginBottom: 70
+            },
+            ios: {
+                marginBottom: 95
+            }
+        })
+    },
+    suggestionContainer: {
+        maxHeight: 190,
+        backgroundColor: 'rgba(0,0,0,0.08)',
+        width: '100%'
+    },
+    suggestionListStyle: {
+        // width: "100%",
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    suggestionClickStyle: {
+        alignItems: 'center',
+        height: 40,
+        backgroundColor: 'white',
+        marginTop: 5,
+        marginBottom: 10,
+        padding: 10
+    },
+    suggestionRowContainer: {
+        width: '100%',
+        height: 25,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    userImage: {
+        height: 40,
+        width: 40,
+        borderRadius: 5
+    },
+    userNameText: {
+        fontSize: 13,
+        letterSpacing: 1,
+        width: '80%',
+        marginLeft: 10
+    },
+    // chat details page
+    detailsContainer: {
+        flex: 1,
+        backgroundColor: "#f5f5f5",
+    },
+    detailsHeader: {
+        alignItems: "center",
+        padding: 20,
+        // backgroundColor: "#fff",
+    },
+    detailsGroupAvatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    detailsGroupImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 50,
+        // backgroundColor: COLORS.grey,
+    },
+    detailsGroupName: {
+        fontSize: 24,
+        fontWeight: "bold",
+        marginTop: 10,
+    },
+    detailsGroupDescription: {
+        fontSize: 16,
+        color: "#666",
+        marginTop: 5,
+        textAlign: "center",
+    },
+    detailsEditButton: {
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: COLORS.orangeCol,
+        borderRadius: 5,
+    },
+    detailsEditButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
+        width: 35,
+        textAlign: "center"
+    },
+    detailsMembersContainer: {
+        width: "100%"
+    },
+    memberContainer: {},
+    detailsMembersTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        margin: 10,
+    },
+    detailsMemberItem: {
+        height: 50,
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 10,
+        backgroundColor: "#fff",
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
+        // borderRadius: 50,
+        marginHorizontal: 10
+    },
+    detailsMemberContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 25,
+        marginRight: 10,
+        backgroundColor: COLORS.grey,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    detailsMemberAvatar: {
+        width: 35,
+        height: 35,
+
+    },
+    detailsMemberName: {
+        fontSize: 16,
+    },
+    detailsModalContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    detailsModalContent: {
+        backgroundColor: "#fff",
+        padding: 20,
+        borderRadius: 10,
+        width: "80%",
+    },
+    detailsInput: {
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 5,
+        padding: 5,
+        marginBottom: 10,
+    },
+    detailsSubmitButton: {
+        backgroundColor: COLORS.orangeCol,
+        padding: 10,
+        borderRadius: 5,
+        alignItems: "center",
+    },
+    detailsSubmitButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
+    },
+    detailsNavBar: {
+        // width: "100%",
+        height: 60,
+        backgroundColor: COLORS.orangeCol,
+        paddingHorizontal: 10,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        // justifyContent: "space-between",
+    },
+    detailsIconContainer: {
+
+    },
+    detailsBackIcon: {
+        marginBottom: 7,
+        height: 30,
+        width: 30,
+    },
+    detailsName: {
+        marginHorizontal: 15,
+        fontSize: SIZES.medium,
+        color: COLORS.white,
+        fontWeight: '700',
+    },
+    //popup on details screen
+    detailsModalHeader: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        marginVertical: 10,
+    },
+    detailsChatModalHeader: {
+        marginHorizontal: 45,
+        marginVertical: 2,
+        fontWeight: "bold",
+        fontSize: 20,
+    },
+    detailsText: {
+        fontWeight: "700",
+        fontSize: 15,
+        marginVertical: 5
+    }
 });
 
 export default styles;

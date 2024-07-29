@@ -57,6 +57,7 @@ const ChooseLanguage = ({ navigation, route }) => {
         setIsLoading(false);
         if (response.ok) {
           await storeData(userName, language);
+          dispatch(getAsyncDetails());
           navigation.navigate("main");
         } else if (response.status === 401) {
           Toast.show("Unable to process the request, please relogin");
