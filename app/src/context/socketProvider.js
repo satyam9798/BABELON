@@ -46,6 +46,7 @@ const WebSocketProvider = ({ children }) => {
     const asyncUsername = await AsyncStorage.getItem("username");
     const asyncLanguage = await AsyncStorage.getItem("language");
     const asyncMobileNum = await AsyncStorage.getItem("mobileNum");
+    const fcmToken = await AsyncStorage.getItem("fcmToken");
 
     const options = {
       connectionTimeout: 5000,
@@ -69,6 +70,12 @@ const WebSocketProvider = ({ children }) => {
         content: webToken,
       };
       sendData(JSON.stringify(initiateSocket));
+
+      const fcmPayload = {
+        type: "fcm_token",
+        content: fcmToken,
+      };
+      sendData(JSON.stringify(fcmPayload));
       if (ws.current.readyState === WebSocket.OPEN) {
       }
       const getChats = {

@@ -39,7 +39,16 @@ const Chat = ({ route, navigation }) => {
   // const [modalVisible, setModalVisible] = useState(false);
   // const [scrollOffset, setScrollOffset] = useState(null);
   // const [isLoading, setIsLoading] = useState(false);
-
+  useEffect(() => {
+    if (!socket) return;
+    const activePayload = {
+      type: "chat_active",
+      roomId,
+      active: "true",
+    };
+    console.log("active payload", activePayload);
+    socket.send(JSON.stringify(activePayload));
+  }, [socket, roomId]);
   const [transcriptEnabled, setTranscriptEnabled] = useState(false);
   const toggleSwitch = () =>
     setTranscriptEnabled((previousState) => !previousState);
@@ -467,6 +476,14 @@ const Chat = ({ route, navigation }) => {
           <TouchableOpacity
             onPress={() => {
               setChatData();
+              if (!socket) return;
+              const activePayload = {
+                type: "chat_active",
+                roomId,
+                active: "false",
+              };
+              console.log("active payload", activePayload);
+              socket.send(JSON.stringify(activePayload));
               navigation.navigate("main");
             }}
           >
