@@ -33,6 +33,7 @@ const MainScreen = ({ navigation }) => {
     );
   };
   useEffect(() => {
+    dispatch(getAsyncDetails());
     Linking.getInitialURL()
       .then(async (url) => {
         if (url !== null) {
@@ -72,14 +73,6 @@ const MainScreen = ({ navigation }) => {
       console.log("unSupported link");
     }
   }
-  // const getCurrentchatData = async (incomingData) => {
-  //   dispatch(
-  //     setActiveChat({
-  //       roomId: incomingData.roomId,
-  //       chatType: incomingData.chatType,
-  //     })
-  //   );
-  // };
   useEffect(() => {
     // checkApplicationPermission();
 
@@ -152,6 +145,7 @@ const MainScreen = ({ navigation }) => {
     // delete async data (needed in ENV="DEV" to clear values)
     // AsyncStorage.removeItem("userData");
     // AsyncStorage.removeItem("access");
+    // AsyncStorage.removeItem("websocket_token");
   }, [userData]);
 
   const CreateChatHandle = () => {

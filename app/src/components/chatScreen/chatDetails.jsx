@@ -51,8 +51,10 @@ const ChatDetails = ({ navigation, route }) => {
   };
   useEffect(() => {
     console.log("active change", activeChat);
-    setGroupName(userData.name);
-    setGroupDescription(userData.description);
+    if (userData && userData.name) {
+      setGroupName(userData.name);
+      setGroupDescription(userData.description);
+    }
   }, [activeChat]);
 
   useFocusEffect(
@@ -111,7 +113,7 @@ const ChatDetails = ({ navigation, route }) => {
             style={styles.detailsGroupImage}
           />
         </View>
-        <Text style={styles.detailsGroupName}>{activeChat.username}</Text>
+        <Text style={styles.detailsGroupName}>{activeChat?.username}</Text>
         {chatType === "group" && (
           <>
             <Text style={styles.detailsGroupDescription}>

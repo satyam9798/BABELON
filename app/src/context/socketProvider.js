@@ -46,17 +46,23 @@ const WebSocketProvider = ({ children }) => {
     const asyncUsername = await AsyncStorage.getItem("username");
     const asyncLanguage = await AsyncStorage.getItem("language");
     const asyncMobileNum = await AsyncStorage.getItem("mobileNum");
+
+    const options = {
+      connectionTimeout: 5000,
+      maxRetries: 10,
+      debug: true,
+    };
     ws.current = new ReconnectingWebSocket(
       encodeURI(
         "wss://bableon-django-1193e2d277c3.herokuapp.com/ws/" +
         asyncMobileNum +
         "/?lang=" +
         asyncLanguage
-      )
+      ), [], options
     );
     setSocket(ws.current);
     const webToken = await AsyncStorage.getItem("websocket_token");
-    // console.log("connecting to websocket", ws.current);
+    console.log("connecting to websocket", ws.current);
     ws.current.onopen = () => {
       const initiateSocket = {
         type: "token",
@@ -75,10 +81,10 @@ const WebSocketProvider = ({ children }) => {
       sendData(JSON.stringify(checkMsg));
     };
     ws.current.onclose = (e) => {
-      // console.warn("web socket connection closed", e);
+      console.warn("web socket connection closed", e);
     };
     ws.current.onerror = (e) => {
-      // console.warn("web socket error occured", e);
+      console.warn("web socket error occured", e);
     };
     ws.current.onmessage = (e) => {
       const msg = JSON.parse(e.data);

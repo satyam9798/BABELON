@@ -7,6 +7,7 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
+import { CommonActions } from "@react-navigation/native";
 import images from "../../../constants/images";
 import styles from "../../../styles/index.styles";
 // import { LinearGradient } from "expo-linear-gradient";
@@ -17,6 +18,7 @@ import { getAsyncDetails, handleUserDetails } from "../../store/asyncSlice";
 import Toast from "react-native-simple-toast";
 
 import { useSelector, useDispatch } from "react-redux";
+import { retreiveData } from "../../store/dataSlice";
 
 const languages = [
   { label: "Assamese", value: "as" },
@@ -57,8 +59,14 @@ const ChooseLanguage = ({ navigation, route }) => {
         setIsLoading(false);
         if (response.ok) {
           await storeData(userName, language);
+          dispatch(retreiveData());
           dispatch(getAsyncDetails());
-          navigation.navigate("main");
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: "main" }],
+            })
+          );
         } else if (response.status === 401) {
           Toast.show("Unable to process the request, please relogin");
           navigation.navigate("RegistrationScreen");
