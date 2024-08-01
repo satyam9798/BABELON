@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import styles from "../../../styles/index.styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from "@react-native-community/netinfo";
 
 import images from "../../../constants/images";
 import {
@@ -29,12 +30,15 @@ import { saveMessage, saveData, setActiveChat } from "../../store/dataSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { retreiveAsyncData } from "../../store/asyncSlice";
 import CustomInputToolbar from "./CustomInputToolBar";
+import InAppNotification from "../modal/InAppNotification";
 
 const Chat = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const socket = useContext(WebSocketContext);
   const { activeChat, userData } = useSelector((state) => state.chatDataSlice);
   const { mobileNum, username } = useSelector((state) => state.asyncDataSlice);
+  const [isOnline, setIsOnline] = useState(true);
+  const [queuedMessages, setQueuedMessages] = useState([]);
   const [clearInput, setClearInput] = useState(false);
   // const [modalVisible, setModalVisible] = useState(false);
   // const [scrollOffset, setScrollOffset] = useState(null);
@@ -62,6 +66,17 @@ const Chat = ({ route, navigation }) => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const maxCharacters = 180;
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(state.isConnected);
+      if (state.isConnected) {
+        sendQueuedMessages();
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     handlelink();
@@ -425,6 +440,13 @@ const Chat = ({ route, navigation }) => {
       setClearInput(false);
     }
   }, [clearInput]);
+
+  const sendQueuedMessages = () => {
+    queuedMessages.forEach((message) => {
+      // sendMessage(message);
+    });
+    setQueuedMessages([]);
+  };
   const onSend = (messages = []) => {
     const modifiedMessage = {
       ...messages[0],
@@ -435,6 +457,16 @@ const Chat = ({ route, navigation }) => {
       },
     };
     if (!socket) return;
+    //logic to handle net issues
+    // console.log("checking net status", isOnline);
+    if (!isOnline) {
+      //   console.log("Not online");
+      //   setQueuedMessages((prevQueue) => [...prevQueue, modifiedMessage]);
+      // Optionally, you can add the message to the UI immediately
+      // setMessages(prevMessages => GiftedChat.append(prevMessages, [modifiedMessage]));
+      return;
+    }
+
     if (chatType == "single") {
       const message = {
         type: "send_message",
@@ -539,6 +571,13 @@ const Chat = ({ route, navigation }) => {
             />
           </View> */}
         </View>
+        {!isOnline && (
+          <View style={styles.offlineBar}>
+            <Text style={styles.offlineText}>
+              You are offline. Messages will be sent when you're back online.
+            </Text>
+          </View>
+        )}
         {userType && (
           <>
             <GiftedChat
@@ -567,6 +606,7 @@ const Chat = ({ route, navigation }) => {
             />
           </>
         )}
+        <InAppNotification />
       </View>
     </React.Fragment>
   );

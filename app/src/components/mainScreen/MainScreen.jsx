@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
-import { View, Text, TouchableOpacity, TextInput, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Image,
+  Alert,
+} from "react-native";
 import * as Linking from "expo-linking";
 import messaging from "@react-native-firebase/messaging";
 import firebase from "@react-native-firebase/app";
@@ -16,6 +23,7 @@ import CreateChatModal from "../modal/CreateChatModal";
 import { getAsyncDetails, handleFcmToken } from "../../store/asyncSlice";
 import { retreiveData, setActiveChat } from "../../store/dataSlice";
 import { WebSocketContext } from "../../context/socketProvider";
+import InAppNotification from "../modal/InAppNotification";
 
 const MainScreen = ({ navigation }) => {
   const socket = useContext(WebSocketContext);
@@ -80,19 +88,6 @@ const MainScreen = ({ navigation }) => {
     };
   }, []);
   useEffect(() => {
-    // checkApplicationPermission();
-
-    // if (requestUserPermission()) {
-    //   messaging()
-    //     .getToken()
-    //     .then((fcmToken) => {
-    //       console.log("FCM TOKEN : ", fcmToken);
-    //       dispatch(handleFcmToken({ fcmToken }));
-    //     });
-    // } else {
-    //   console.log("Request not authorized for FCM");
-    // }
-
     messaging()
       .getInitialNotification()
       .then(async (remoteMessage) => {
@@ -210,17 +205,6 @@ const MainScreen = ({ navigation }) => {
   };
 
   return (
-    // <SafeAreaView>
-    //   <ImageBackground
-    //     source={images.BackgroundImage}
-    //     resizeMode="cover"
-    //     style={styles.container}
-    //   >
-    //     <LinearGradient
-    //       colors={["#373540", "#23202c"]}
-    //       locations={[0.5, 0.8]}
-    //       style={[styles.container, styles.bgOpacity]}
-    //     >
     <View style={[styles.mainContainer, styles.bgOpacity]}>
       <View style={styles.MainNavbar}>
         <View>
@@ -289,11 +273,8 @@ const MainScreen = ({ navigation }) => {
       >
         <Image style={styles.plusIcon} source={images.Settings} />
       </TouchableOpacity>
+      <InAppNotification navigation />
     </View>
-    // {/* <SocketEventHandler /> */}
-    //     </LinearGradient>
-    //   </ImageBackground>
-    // </SafeAreaView>
   );
 };
 

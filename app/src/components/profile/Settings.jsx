@@ -6,6 +6,7 @@ import images from "../../../constants/images";
 import { useSelector } from "react-redux";
 import * as Clipboard from "expo-clipboard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import InAppNotification from "../modal/InAppNotification";
 
 const languages = [
   { label: "Assamese", value: "as" },
@@ -136,6 +137,7 @@ const SettingsPage = ({ navigation }) => {
             </Collapsible>
           </View>
         </View>
+        <InAppNotification />
       </View>
     </ScrollView>
   );
