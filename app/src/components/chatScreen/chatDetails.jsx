@@ -49,6 +49,12 @@ const ChatDetails = ({ navigation, route }) => {
     dispatch(setActiveChat({ roomId, chatType }));
     setModalVisible(false);
   };
+  const btnDisabled = () => {
+    if (!tempName) {
+      return true;
+    }
+    return false;
+  };
   useEffect(() => {
     console.log("active change", activeChat);
     if (userData && userData.name) {
@@ -176,7 +182,12 @@ const ChatDetails = ({ navigation, route }) => {
               maxLength={100}
             />
             <TouchableOpacity
-              style={styles.detailsSubmitButton}
+              disabled={btnDisabled()}
+              style={
+                btnDisabled()
+                  ? styles.detailsSubmitButtonDisabled
+                  : styles.detailsSubmitButton
+              }
               onPress={handleSubmit}
             >
               <Text style={styles.detailsSubmitButtonText}>Submit</Text>

@@ -74,6 +74,12 @@ const MainScreen = ({ navigation }) => {
     }
   }
   useEffect(() => {
+    return () => {
+      console.log("Unmouting web socket");
+      if (socket) socket.close();
+    };
+  }, []);
+  useEffect(() => {
     // checkApplicationPermission();
 
     // if (requestUserPermission()) {

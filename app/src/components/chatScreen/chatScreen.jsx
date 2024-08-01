@@ -41,14 +41,16 @@ const Chat = ({ route, navigation }) => {
   // const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     if (!socket) return;
-    const activePayload = {
-      type: "chat_active",
-      roomId,
-      active: "true",
-    };
-    console.log("active payload", activePayload);
-    socket.send(JSON.stringify(activePayload));
-  }, [socket, roomId]);
+    if (roomId && chatType) {
+      const activePayload = {
+        type: "chat_active",
+        roomId,
+        chatType,
+        active: "true",
+      };
+      socket.send(JSON.stringify(activePayload));
+    }
+  }, [socket, roomId, chatType]);
   const [transcriptEnabled, setTranscriptEnabled] = useState(false);
   const toggleSwitch = () =>
     setTranscriptEnabled((previousState) => !previousState);
@@ -480,9 +482,9 @@ const Chat = ({ route, navigation }) => {
               const activePayload = {
                 type: "chat_active",
                 roomId,
+                chatType,
                 active: "false",
               };
-              console.log("active payload", activePayload);
               socket.send(JSON.stringify(activePayload));
               navigation.navigate("main");
             }}
