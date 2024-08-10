@@ -622,6 +622,15 @@ const styles = StyleSheet.create({
         color: COLORS.white,
         fontWeight: '700',
     },
+    //net info
+    offlineBar: {
+        backgroundColor: 'red',
+        padding: 10,
+    },
+    offlineText: {
+        color: 'white',
+        textAlign: 'center',
+    },
     // custom input toolbar
     inputContainer: {
         flexDirection: "row",
@@ -888,6 +897,10 @@ const styles = StyleSheet.create({
     detailsMembersContainer: {
         width: "100%"
     },
+    shareIcon: {
+        height: 25,
+        width: 25,
+    },
     memberContainer: {},
     detailsMembersTitle: {
         fontSize: 18,
@@ -944,6 +957,12 @@ const styles = StyleSheet.create({
     },
     detailsSubmitButton: {
         backgroundColor: COLORS.orangeCol,
+        padding: 10,
+        borderRadius: 5,
+        alignItems: "center",
+    },
+    detailsSubmitButtonDisabled: {
+        backgroundColor: COLORS.grey,
         padding: 10,
         borderRadius: 5,
         alignItems: "center",

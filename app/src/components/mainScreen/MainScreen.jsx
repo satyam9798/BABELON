@@ -106,18 +106,10 @@ const MainScreen = ({ navigation }) => {
         }
       });
 
-    messaging().onNotificationOpenedApp(async (remoteMessage) => {
-      if (remoteMessage) {
-        console.log("notification caused app to open");
-      }
-    });
-    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-      console.log("message handled in background");
-    });
+    messaging().onNotificationOpenedApp(async (remoteMessage) => {});
+    messaging().setBackgroundMessageHandler(async (remoteMessage) => {});
 
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      console.log("New FCM message arrived");
-    });
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {});
 
     // messaging().unsubscribeFromTopic(TOPIC).then(() => {
     //   console.log(TOPIC, " subscribed");

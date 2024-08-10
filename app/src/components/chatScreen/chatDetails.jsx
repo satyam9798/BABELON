@@ -7,7 +7,7 @@ import {
   FlatList,
   Modal,
   TextInput,
-  StyleSheet,
+  Share,
 } from "react-native";
 import images from "../../../constants/images";
 import styles from "../../../styles/index.styles";
@@ -56,10 +56,11 @@ const ChatDetails = ({ navigation, route }) => {
     return false;
   };
   useEffect(() => {
-    console.log("active change", activeChat);
-    if (userData && userData.name) {
-      setGroupName(userData.name);
-      setGroupDescription(userData.description);
+    if (activeChat) {
+      setGroupName(activeChat.username);
+      setGroupDescription(activeChat.description);
+      setTempName(activeChat.username);
+      setTempDescription(activeChat.description);
     }
   }, [activeChat]);
 
@@ -170,7 +171,7 @@ const ChatDetails = ({ navigation, route }) => {
               value={tempName}
               onChangeText={setTempName}
               placeholder="Group Name"
-              maxLength={20}
+              maxLength={50}
             />
             <Text style={styles.detailsText}>Group Description</Text>
             <TextInput
@@ -179,7 +180,7 @@ const ChatDetails = ({ navigation, route }) => {
               onChangeText={setTempDescription}
               placeholder="Group Description"
               multiline
-              maxLength={100}
+              maxLength={150}
             />
             <TouchableOpacity
               disabled={btnDisabled()}
@@ -195,6 +196,19 @@ const ChatDetails = ({ navigation, route }) => {
           </View>
         </View>
       </Modal>
+      <TouchableOpacity
+        style={styles.settingsButton}
+        onPress={async () => {
+          if (roomId && chatType && linkType) {
+            const link = `https://bableon-django-1193e2d277c3.herokuapp.com/app/chat/2/${roomId}/${chatType}/${linkType}`;
+            const result = await Share.share({
+              message: "Hi, start a chat on BabelON  " + link,
+            });
+          }
+        }}
+      >
+        <Image style={styles.shareIcon} source={images.Share} />
+      </TouchableOpacity>
     </View>
   );
 };

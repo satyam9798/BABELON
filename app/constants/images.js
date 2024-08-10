@@ -12,6 +12,7 @@ import Settings from "../../assets/images/logos/settings.png";
 import ArrowUp from "../../assets/images/logos/arrow-up.png";
 import ArrowDown from "../../assets/images/logos/arrow-down.png";
 import Edit from "../../assets/images/logos/edit.png";
+import Share from "../../assets/images/logos/share.png";
 
 import QrImage from "../../assets/images/qrCode.png";
 import ArrowRight from "../../assets/images/right-arrow.png";
@@ -46,6 +47,7 @@ export default {
   ArrowDown,
   ArrowUp,
   Edit,
+  Share,
 
   QrImage,
   ArrowRight,

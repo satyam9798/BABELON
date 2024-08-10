@@ -5,8 +5,6 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
-  ImageBackground,
-  SafeAreaView,
   ActivityIndicator,
 } from "react-native";
 import styles from "../../../styles/index.styles";
@@ -16,10 +14,10 @@ import {
   verifyMobileNumber,
 } from "../../AppNavigator/services/apiServices";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../../../constants/theme";
 import { useSelector, useDispatch } from "react-redux";
 import { getAsyncDetails, handleToken } from "../../store/asyncSlice";
+import Toast from "react-native-simple-toast";
 
 const VerificationPage = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -108,7 +106,8 @@ const VerificationPage = ({ navigation, route }) => {
               mobile: mobileNum,
             });
           });
-        } else {
+        } else if (response.status == 400) {
+          Toast.show("please register again");
         }
       })
       .catch((error) => {
@@ -169,134 +168,6 @@ const VerificationPage = ({ navigation, route }) => {
 
   const number = mobileNum;
   return (
-    // <SafeAreaView>
-    //   <ImageBackground
-    //     source={images.BackgroundImage}
-    //     resizeMode="cover"
-    //     style={styles.container}
-    //   >
-    //     <LinearGradient
-    //       colors={["#373540", "#23202c"]}
-    //       locations={[0.5, 0.8]}
-    //       style={[styles.container, styles.bgOpacity]}
-    //     >
-    //       <View style={[styles.regContainer]}>
-    //         <View style={styles.landingBack}>
-    //           <TouchableOpacity
-    //             onPress={() => {
-    //               navigation.navigate("RegistrationScreen");
-    //             }}
-    //           >
-    //             <Image style={styles.backIcon} source={images.LeftArrowIcon} />
-    //           </TouchableOpacity>
-    //         </View>
-
-    //         <View style={styles.textContainer}>
-    //           <Text style={styles.regSmHeader}>
-    //             Enter Your {"\n"} Verification code
-    //           </Text>
-    //           {isOTPResnt ? (
-    //             <Text style={styles.regText}>
-    //               We have resent you an one Time {"\n"} Passcode on{" "}
-    //               <Text style={{ color: COLORS.orangeCol }}>{number}</Text>
-    //             </Text>
-    //           ) : (
-    //             <Text style={styles.regText}>
-    //               Please provide one time passcode sent on{" "}
-    //               <Text style={{ color: COLORS.orangeCol }}>{number}</Text>
-    //             </Text>
-    //           )}
-
-    //           <View style={styles.otpInputWrapper}>
-    //             <TextInput
-    //               style={styles.otpInputBox}
-    //               onChangeText={(text) => {
-    //                 setInput_1(text);
-    //                 if (text.length === 1) {
-    //                   focusNextInput(input2Ref);
-    //                 }
-    //               }}
-    //               onKeyPress={(event) => handleKeyPress(event, input1Ref)}
-    //               inputMode="numeric"
-    //               maxLength={1}
-    //               ref={input1Ref}
-    //             />
-    //             <TextInput
-    //               style={styles.otpInputBox}
-    //               onKeyPress={(event) => handleKeyPress(event, input2Ref)}
-    //               inputMode="numeric"
-    //               maxLength={1}
-    //               ref={input2Ref}
-    //               onChangeText={(text) => {
-    //                 setInput_2(text);
-    //                 if (text.length === 1) {
-    //                   focusNextInput(input3Ref);
-    //                 }
-    //               }}
-    //             />
-    //             <TextInput
-    //               style={styles.otpInputBox}
-    //               onKeyPress={(event) => handleKeyPress(event, input3Ref)}
-    //               inputMode="numeric"
-    //               maxLength={1}
-    //               ref={input3Ref}
-    //               onChangeText={(text) => {
-    //                 setInput_3(text);
-    //                 if (text.length === 1) {
-    //                   focusNextInput(input4Ref);
-    //                 }
-    //               }}
-    //             />
-    //             <TextInput
-    //               style={styles.otpInputBox}
-    //               onKeyPress={(event) => handleKeyPress(event, input4Ref)}
-    //               inputMode="numeric"
-    //               maxLength={1}
-    //               ref={input4Ref}
-    //               onChangeText={(text) => {
-    //                 setInput_4(text);
-    //               }}
-    //             />
-    //           </View>
-    //           <View style={styles.timer}>
-    //             {(seconds > 0 || minutes > 0) && (
-    //               <Text style={styles.timerText}>
-    //                 {minutes < 10 ? `0${minutes}` : minutes}:
-    //                 {seconds < 10 ? `0${seconds}` : seconds}
-    //               </Text>
-    //             )}
-    //           </View>
-    //           <TouchableOpacity
-    //             style={isDisabled() ? styles.disabledBtn : styles.verifyOtpBtn}
-    //             onPress={nextScreen}
-    //             disabled={isDisabled()}
-    //           >
-    //             <Text style={styles.RegBtnText}>Verify OTP</Text>
-    //           </TouchableOpacity>
-    //           {seconds === 0 && minutes === 0 && (
-    //             <View style={styles.resendOTP}>
-    //               <Text>Didn't recieve code? </Text>
-    //               <TouchableOpacity>
-    //                 <Text
-    //                   disabled={seconds > 0 || minutes > 0}
-    //                   style={{
-    //                     color:
-    //                       seconds > 0 || minutes > 0
-    //                         ? "white"
-    //                         : COLORS.orangeCol,
-    //                   }}
-    //                   onPress={resendOTP}
-    //                 >
-    //                   Resend OTP
-    //                 </Text>
-    //               </TouchableOpacity>
-    //             </View>
-    //           )}
-    //         </View>
-    //       </View>
-    //     </LinearGradient>
-    //   </ImageBackground>
-    // </SafeAreaView>
     <View style={styles.verifyContainer}>
       <View style={styles.landingBack}>
         <TouchableOpacity
@@ -324,57 +195,7 @@ const VerificationPage = ({ navigation, route }) => {
           <Text>Not your number?</Text>
         </TouchableOpacity>
       </View>
-      {/* <View style={styles.otpInputWrapper}>
-        <TextInput
-          style={styles.otpInputBox}
-          onChangeText={(text) => {
-            setInput_1(text);
-            if (text.length === 1) {
-              focusNextInput(input2Ref);
-            }
-          }}
-          onKeyPress={(event) => handleKeyPress(event, input1Ref)}
-          inputMode="numeric"
-          maxLength={1}
-          ref={input1Ref}
-        />
-        <TextInput
-          style={styles.otpInputBox}
-          onKeyPress={(event) => handleKeyPress(event, input2Ref)}
-          inputMode="numeric"
-          maxLength={1}
-          ref={input2Ref}
-          onChangeText={(text) => {
-            setInput_2(text);
-            if (text.length === 1) {
-              focusNextInput(input3Ref);
-            }
-          }}
-        />
-        <TextInput
-          style={styles.otpInputBox}
-          onKeyPress={(event) => handleKeyPress(event, input3Ref)}
-          inputMode="numeric"
-          maxLength={1}
-          ref={input3Ref}
-          onChangeText={(text) => {
-            setInput_3(text);
-            if (text.length === 1) {
-              focusNextInput(input4Ref);
-            }
-          }}
-        />
-        <TextInput
-          style={styles.otpInputBox}
-          onKeyPress={(event) => handleKeyPress(event, input4Ref)}
-          inputMode="numeric"
-          maxLength={1}
-          ref={input4Ref}
-          onChangeText={(text) => {
-            setInput_4(text);
-          }}
-        />
-      </View> */}
+
       <TextInput
         style={styles.inputOtp}
         placeholder="OTP"
@@ -395,7 +216,7 @@ const VerificationPage = ({ navigation, route }) => {
       {isLoading && <ActivityIndicator size="large" color="#ef8354" />}
       <TouchableOpacity
         style={isDisabled() ? styles.verifyDisabledButton : styles.verifyButton}
-        disabled={isDisabled()}
+        disabled={isLoading}
         onPress={nextScreen}
       >
         <Text style={styles.verifyButtonText}>Verify</Text>

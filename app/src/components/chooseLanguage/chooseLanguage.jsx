@@ -122,17 +122,6 @@ const ChooseLanguage = ({ navigation, route }) => {
   };
 
   return (
-    // <SafeAreaView>
-    //   <ImageBackground
-    //     source={images.BackgroundImage}
-    //     resizeMode="cover"
-    //     style={styles.container}
-    //   >
-    //     <LinearGradient
-    //       colors={["#373540", "#23202c"]}
-    //       locations={[0.5, 0.8]}
-    //       style={[styles.container, styles.bgOpacity]}
-    //     >
     <View style={[styles.languagePageContainer]}>
       <View style={[styles.textContainer, styles.usernameBody]}>
         <View style={{ display: "flex", flexDirection: "row" }}>
@@ -186,15 +175,12 @@ const ChooseLanguage = ({ navigation, route }) => {
       {isLoading && <ActivityIndicator size="large" color="#ef8354" />}
       <TouchableOpacity
         style={isDisabled() ? styles.verifyDisabledButton : styles.verifyButton}
-        disabled={isDisabled()}
+        disabled={isLoading}
         onPress={nextScreen}
       >
         <Text style={styles.RegBtnText}>Submit</Text>
       </TouchableOpacity>
     </View>
-    //     </LinearGradient>
-    //   </ImageBackground>
-    // </SafeAreaView>
   );
 };
 export default ChooseLanguage;

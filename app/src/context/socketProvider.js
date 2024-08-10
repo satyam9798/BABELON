@@ -63,7 +63,6 @@ const WebSocketProvider = ({ children }) => {
     );
     setSocket(ws.current);
     const webToken = await AsyncStorage.getItem("websocket_token");
-    console.log("connecting to websocket", ws.current);
     ws.current.onopen = () => {
       const initiateSocket = {
         type: "token",
@@ -71,21 +70,21 @@ const WebSocketProvider = ({ children }) => {
       };
       sendData(JSON.stringify(initiateSocket));
 
-      const fcmPayload = {
-        type: "fcm_token",
-        content: fcmToken,
-      };
-      sendData(JSON.stringify(fcmPayload));
-      if (ws.current.readyState === WebSocket.OPEN) {
-      }
-      const getChats = {
-        type: "get_chats",
-      };
-      sendData(JSON.stringify(getChats));
-      const checkMsg = {
-        type: "check_messages",
-      };
-      sendData(JSON.stringify(checkMsg));
+      // const fcmPayload = {
+      //   type: "fcm_token",
+      //   content: fcmToken,
+      // };
+      // sendData(JSON.stringify(fcmPayload));
+      // if (ws.current.readyState === WebSocket.OPEN) {
+      // }
+      // const getChats = {
+      //   type: "get_chats",
+      // };
+      // sendData(JSON.stringify(getChats));
+      // const checkMsg = {
+      //   type: "check_messages",
+      // };
+      // sendData(JSON.stringify(checkMsg));
     };
     ws.current.onclose = (e) => {
       console.warn("web socket connection closed", e);
@@ -95,10 +94,26 @@ const WebSocketProvider = ({ children }) => {
     };
     ws.current.onmessage = (e) => {
       const msg = JSON.parse(e.data);
-      console.log("msg", msg)
       if (msg?.type == "invalid_user") {
       }
       if (msg?.type == "token") {
+        if (msg?.message === 'accepted') {
+          const fcmPayload = {
+            type: "fcm_token",
+            content: fcmToken,
+          };
+          sendData(JSON.stringify(fcmPayload));
+          if (ws.current.readyState === WebSocket.OPEN) {
+          }
+          const getChats = {
+            type: "get_chats",
+          };
+          sendData(JSON.stringify(getChats));
+          const checkMsg = {
+            type: "check_messages",
+          };
+          sendData(JSON.stringify(checkMsg));
+        }
         // handle token messages
       } else if (msg?.type == "user_chats") {
         // handle members in a group

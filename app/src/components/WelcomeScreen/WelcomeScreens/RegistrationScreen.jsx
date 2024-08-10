@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { verifyMobileNumber } from "../../../AppNavigator/services/apiServices";
 import CountryPicker from "react-native-country-picker-modal";
 // import { LinearGradient } from "expo-linear-gradient";
 import AnimatedLoader from "react-native-animated-loader";
+import { WebSocketContext } from "../../../context/socketProvider";
 
 // const countryCode = [
 //   { label: "+91", value: "+91" },
@@ -24,6 +25,7 @@ import AnimatedLoader from "react-native-animated-loader";
 // ];
 
 const RegistrationScreen = ({ navigation }) => {
+  const socket = useContext(WebSocketContext);
   const [input, setInput] = useState("");
   const [value, setValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -66,84 +68,6 @@ const RegistrationScreen = ({ navigation }) => {
   };
 
   return (
-    // <SafeAreaView>
-    //   <ImageBackground
-    //     source={images.BackgroundImage}
-    //     resizeMode="cover"
-    //     style={styles.container}
-    //   >
-    //     <LinearGradient
-    //       colors={["#373540", "#23202c"]}
-    //       locations={[0.5, 0.8]}
-    //       style={[styles.container, styles.bgOpacity]}
-    //     >
-    //       <View style={[styles.regContainer]}>
-    //         <View style={styles.landingBack}>
-    //           <TouchableOpacity
-    //             onPress={() => {
-    //               navigation.navigate("LandingScreen");
-    //             }}
-    //           >
-    //             <Image style={styles.backIcon} source={images.LeftArrowIcon} />
-    //           </TouchableOpacity>
-    //         </View>
-
-    //         <View style={styles.regBodyContainer}>
-    //           <Text style={styles.regSmHeader}>Enter your Mobile Number</Text>
-    //           <Text style={styles.regText}>
-    //             BabelON will need to verify your {"\n"} mobile number
-    //           </Text>
-    //         </View>
-    //         <View style={styles.regInpCont}>
-    //           <View style={styles.RegInput}>
-    //             <View style={styles.regDropdownContainer}>
-    //               <Dropdown
-    //                 style={[
-    //                   styles.regDropdown,
-    //                   isFocus && { borderColor: "blue" },
-    //                 ]}
-    //                 placeholderStyle={styles.regPlaceholderStyle}
-    //                 selectedTextStyle={styles.regSelectedTextStyle}
-    //                 inputSearchStyle={styles.regInputSearchStyle}
-    //                 iconStyle={styles.regIconStyle}
-    //                 data={countryCode}
-    //                 search
-    //                 maxHeight={300}
-    //                 labelField="label"
-    //                 valueField="value"
-    //                 placeholder={!isFocus ? "   +   " : "  ...  "}
-    //                 searchPlaceholder="Search"
-    //                 value={value}
-    //                 onFocus={() => setIsFocus(true)}
-    //                 onBlur={() => setIsFocus(false)}
-    //                 onChange={(item) => {
-    //                   setCode(item.value);
-    //                   setIsFocus(false);
-    //                 }}
-    //               />
-    //             </View>
-    //             <TextInput
-    //               inputMode="numeric"
-    //               placeholder="Enter mobile number"
-    //               style={styles.RegTextInput}
-    //               onChangeText={(text) => setInput(text)}
-    //               value={input}
-    //               maxLength={10}
-    //             />
-    //           </View>
-    //         </View>
-
-    //         <TouchableOpacity
-    //           style={isDisabled() ? styles.disabledRegBtn : styles.RegBtn}
-    //           onPress={nextScreen}
-    //           disabled={isDisabled()}
-    //         >
-    //           <Text style={styles.RegBtnText}>Send OTP</Text>
-    //         </TouchableOpacity>
-    //       </View>
-    //     </LinearGradient>
-    //   </ImageBackground>
-    // </SafeAreaView>
     <View style={styles.container}>
       <View style={styles.landingBack}>
         <TouchableOpacity

@@ -17,6 +17,8 @@ import {
 import styles from "../../../styles/index.styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
+import * as Linking from "expo-linking";
+import { CommonActions } from "@react-navigation/native";
 
 import images from "../../../constants/images";
 import {
@@ -40,9 +42,6 @@ const Chat = ({ route, navigation }) => {
   const [isOnline, setIsOnline] = useState(true);
   const [queuedMessages, setQueuedMessages] = useState([]);
   const [clearInput, setClearInput] = useState(false);
-  // const [modalVisible, setModalVisible] = useState(false);
-  // const [scrollOffset, setScrollOffset] = useState(null);
-  // const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     if (!socket) return;
     if (roomId && chatType) {
@@ -68,6 +67,24 @@ const Chat = ({ route, navigation }) => {
   const maxCharacters = 180;
 
   useEffect(() => {
+    Linking.getInitialURL()
+      .then(async (url) => {
+        if (url !== null) {
+          console.log("navigating to url", url);
+          const token = await AsyncStorage.getItem("access");
+          const username = await AsyncStorage.getItem("username");
+          if (!token || !username) {
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: "WelcomeScreen" }],
+              })
+            );
+          }
+        }
+      })
+      .catch((err) => console.error("An error occurred", err));
+
     const unsubscribe = NetInfo.addEventListener((state) => {
       setIsOnline(state.isConnected);
       if (state.isConnected) {
@@ -456,14 +473,11 @@ const Chat = ({ route, navigation }) => {
         name: `${username}`,
       },
     };
-    if (!socket) return;
-    //logic to handle net issues
-    // console.log("checking net status", isOnline);
+    if (!socket) {
+      return;
+    }
     if (!isOnline) {
-      //   console.log("Not online");
-      //   setQueuedMessages((prevQueue) => [...prevQueue, modifiedMessage]);
-      // Optionally, you can add the message to the UI immediately
-      // setMessages(prevMessages => GiftedChat.append(prevMessages, [modifiedMessage]));
+      setQueuedMessages((prevQueue) => [...prevQueue, modifiedMessage]);
       return;
     }
 

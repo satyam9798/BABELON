@@ -1,5 +1,6 @@
 const localUrl = "http://localhost:8000/chat/";
-const Baseurl = "https://bableon-django-1193e2d277c3.herokuapp.com";
+// const Baseurl = "https://bableon-django-1193e2d277c3.herokuapp.com";
+const Baseurl = 'https://babelonbe-asbcbvhmbhdsfgeg.eastus-01.azurewebsites.net'
 
 export const getMoviesFromApiAsync = async () => {
   return await fetch(`${Baseurl}/?page=2`);
