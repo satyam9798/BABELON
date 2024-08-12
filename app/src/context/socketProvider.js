@@ -49,7 +49,7 @@ const WebSocketProvider = ({ children }) => {
     const fcmToken = await AsyncStorage.getItem("fcmToken");
 
     const options = {
-      connectionTimeout: 5000,
+      connectionTimeout: 12000,
       maxRetries: 10,
       debug: true,
     };
