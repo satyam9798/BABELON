@@ -55,7 +55,7 @@ const WebSocketProvider = ({ children }) => {
     };
     ws.current = new ReconnectingWebSocket(
       encodeURI(
-        "wss://bableon-django-1193e2d277c3.herokuapp.com/ws/" +
+        "wss://babelonbe-asbcbvhmbhdsfgeg.eastus-01.azurewebsites.net/ws/" +
         asyncMobileNum +
         "/?lang=" +
         asyncLanguage
