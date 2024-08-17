@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -19,8 +19,10 @@ import {
 } from "../../AppNavigator/services/apiServices";
 import { useSelector, useDispatch } from "react-redux";
 import { saveData } from "../../store/dataSlice";
+import { WebSocketContext } from "../../context/socketProvider";
 
 const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
+  const socket = useContext(WebSocketContext);
   const dispatch = useDispatch();
   const [linkType, setLinkType] = useState("temporary");
   const [chatType, setChatType] = useState("single");
@@ -66,6 +68,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                     : permanentBackground,
                 username: `unknown${body.request_id}`,
                 msg: [],
+                queuedMsg: [],
                 translatedMsg: [],
                 timestamp: formattedDate,
               };
@@ -96,7 +99,6 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
             navigation.navigate("RegistrationScreen");
           } else if (response?.ok) {
             response.json().then((body) => {
-              console.log("link craere", linkType, chatType, body);
               const link = `https://bableon-django-1193e2d277c3.herokuapp.com/app/chat/2/${body.group_id}/${chatType}/${linkType}`;
               const tempBackground = "#92a8d1";
               const permanentBackground = "#eea29a";
@@ -107,7 +109,6 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
               const roomId = body.group_id;
               const username = "Group" + roomId;
               const formattedDate = `${year}-${month}-${day}`;
-              console.log("link url", linkType);
               const data = {
                 roomId: body.group_id,
                 userType: 1,
@@ -121,6 +122,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                     : permanentBackground,
                 username: username,
                 msg: [],
+                queuedMsg: [],
                 translatedMsg: [],
                 description: "Group description",
                 members: [],
@@ -129,6 +131,12 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
               };
               dispatch(saveData({ data: data, chatType: chatType }));
               navigation.navigate("linkShare", { link: link, data: data });
+              const getChats = {
+                type: "get_chats",
+              };
+              if (socket) {
+                socket?.send(JSON.stringify(getChats));
+              }
               closeModal();
             });
           } else {

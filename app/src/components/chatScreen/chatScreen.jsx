@@ -1,19 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import {
-  GiftedChat,
-  InputToolbar,
-  Send,
-  Bubble,
-} from "react-native-gifted-chat";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  Switch,
-  TextInput,
-  FlatList,
-} from "react-native";
+import { GiftedChat, Bubble } from "react-native-gifted-chat";
+import { View, Text, Image, TouchableOpacity, Switch } from "react-native";
 import styles from "../../../styles/index.styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
@@ -28,32 +15,28 @@ import {
 import Toast from "react-native-simple-toast";
 import { useFocusEffect } from "@react-navigation/native";
 import { WebSocketContext } from "../../context/socketProvider";
-import { saveMessage, saveData, setActiveChat } from "../../store/dataSlice";
+import {
+  saveMessage,
+  saveData,
+  setActiveChat,
+  updateQueuedMessage,
+} from "../../store/dataSlice";
 import { useSelector, useDispatch } from "react-redux";
-import { retreiveAsyncData } from "../../store/asyncSlice";
+import { getAsyncDetails, retreiveAsyncData } from "../../store/asyncSlice";
 import CustomInputToolbar from "./CustomInputToolBar";
 import InAppNotification from "../modal/InAppNotification";
 
 const Chat = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const socket = useContext(WebSocketContext);
-  const { activeChat, userData } = useSelector((state) => state.chatDataSlice);
+  const { activeChat, userData, socketActive, queuedMsg } = useSelector(
+    (state) => state.chatDataSlice
+  );
   const { mobileNum, username } = useSelector((state) => state.asyncDataSlice);
   const [isOnline, setIsOnline] = useState(true);
   const [queuedMessages, setQueuedMessages] = useState([]);
   const [clearInput, setClearInput] = useState(false);
-  useEffect(() => {
-    if (!socket) return;
-    if (roomId && chatType) {
-      const activePayload = {
-        type: "chat_active",
-        roomId,
-        chatType,
-        active: "true",
-      };
-      socket.send(JSON.stringify(activePayload));
-    }
-  }, [socket, roomId, chatType]);
+  let socketStatus = useRef(socketActive);
   const [transcriptEnabled, setTranscriptEnabled] = useState(false);
   const toggleSwitch = () =>
     setTranscriptEnabled((previousState) => !previousState);
@@ -67,10 +50,25 @@ const Chat = ({ route, navigation }) => {
   const maxCharacters = 180;
 
   useEffect(() => {
+    if (activeChat.roomId !== roomId) {
+      setMessages([]);
+      setChatName("");
+    }
+    if (roomId && socketActive === "active") {
+      const activePayload = {
+        type: "chat_active",
+        roomId,
+        chatType,
+        active: "true",
+      };
+      socket.send(JSON.stringify(activePayload));
+    }
+  }, [roomId]);
+
+  useEffect(() => {
     Linking.getInitialURL()
       .then(async (url) => {
         if (url !== null) {
-          console.log("navigating to url", url);
           const token = await AsyncStorage.getItem("access");
           const username = await AsyncStorage.getItem("username");
           if (!token || !username) {
@@ -92,7 +90,9 @@ const Chat = ({ route, navigation }) => {
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -100,11 +100,15 @@ const Chat = ({ route, navigation }) => {
   }, [roomId]);
   useEffect(() => {
     if (activeChat && activeChat.msg && activeChat.translatedMsg) {
-      if (transcriptEnabled) {
+      if (activeChat.roomId !== roomId) {
+        setMessages([]);
+        setChatName("Loading...");
+      } else if (transcriptEnabled) {
         const sortedMessages = activeChat.translatedMsg.slice().sort((a, b) => {
           return new Date(b.createdAt) - new Date(a.createdAt);
         });
         sortedMessages.map((item) => {});
+
         setMessages(sortedMessages);
         setChatName(activeChat.username);
       } else {
@@ -113,6 +117,7 @@ const Chat = ({ route, navigation }) => {
         });
         sortedMessages.map((item) => {});
         setMessages(sortedMessages);
+        messages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         setChatName(activeChat.username);
       }
     }
@@ -188,6 +193,7 @@ const Chat = ({ route, navigation }) => {
                     : permanentBackground,
                 username: `unknown${roomId}`,
                 msg: [],
+                queuedMsg: [],
                 translatedMsg: [],
                 timestamp: formattedDate,
               };
@@ -240,6 +246,7 @@ const Chat = ({ route, navigation }) => {
                     : permanentBackground,
                 username: `group${roomId}`,
                 msg: [],
+                queuedMsg: [],
                 translatedMsg: [],
                 description: "Group description",
                 members: [],
@@ -247,6 +254,21 @@ const Chat = ({ route, navigation }) => {
               };
               dispatch(saveData({ data: setData, chatType: chatType }));
               setChatData(setData);
+              if (socket) {
+                setTimeout(() => {
+                  const getChats = {
+                    type: "get_chats",
+                  };
+
+                  socket.send(JSON.stringify(getChats));
+                  const payload = {
+                    type: "notify_members",
+                    group_id: roomId.toString(),
+                  };
+
+                  socket.send(JSON.stringify(payload));
+                }, 5000);
+              }
             } else if (
               body.message ==
               "Connection request can be used with a single person only"
@@ -263,134 +285,176 @@ const Chat = ({ route, navigation }) => {
       });
   }
   //Input toolbar- customized
-  const customtInputToolbar = (props) => {
+  // const customtInputToolbar = (props) => {
+  //   return (
+  //     <>
+  //       <View style={styles.inputContainer}>
+  //         <Text style={styles.charCount}>
+  //           {text.length} / {maxCharacters}
+  //         </Text>
+  //       </View>
+  //       <InputToolbar
+  //         {...props}
+  //         containerStyle={{
+  //           backgroundColor: "#E8E8E8",
+  //           borderTopColor: "#E8E8E8",
+  //           borderTopWidth: 1,
+  //           padding: 8,
+  //           borderRadius: 50,
+  //           marginHorizontal: 10,
+  //           height: 50,
+  //           marginBottom: 20,
+  //           justifyContent: "center",
+  //         }}
+  //         renderSend={(props) => {
+  //           return (
+  //             <>
+  //               <Send
+  //                 {...props}
+  //                 containerStyle={{
+  //                   justifyContent: "center",
+  //                   alignItems: "center",
+  //                   alignSelf: "center",
+  //                   marginRight: 15,
+  //                 }}
+  //               ></Send>
+  //             </>
+  //           );
+  //         }}
+  //       />
+  //     </>
+  //   );
+  //   // return (
+  //   //   <View>
+  //   //     <InputToolbar
+  //   //       {...props}
+  //   //       containerStyle={styles.toolbarContainer}
+  //   //       renderComposer={(composerProps) => (
+  //   //         <View style={styles.inputContainer}>
+  //   //           <TextInput
+  //   //             {...composerProps}
+  //   //             value={text}
+  //   //             onChangeText={handleTextChange}
+  //   //             style={styles.textInput}
+  //   //           />
+  //   //           <Text style={styles.charCount}>
+  //   //             {text.length} / {maxCharacters}
+  //   //           </Text>
+  //   //         </View>
+  //   //       )}
+  //   //       renderSend={(props) => {
+  //   //         return (
+  //   //           <>
+  //   //             <Send
+  //   //               {...props}
+  //   //               containerStyle={{
+  //   //                 justifyContent: "center",
+  //   //                 alignItems: "center",
+  //   //                 alignSelf: "center",
+  //   //                 marginRight: 15,
+  //   //               }}
+  //   //             ></Send>
+  //   //           </>
+  //   //         );
+  //   //       }}
+  //   //     />
+  //   //   </View>
+  //   // );
+  // };
+
+  const TickIndicator = ({ status }) => {
+    let ticks;
+    switch (status) {
+      case "sent":
+        ticks = "✓";
+        break;
+      case "delivered":
+        ticks = "✓✓";
+        break;
+      case "read":
+        ticks = "✓✓";
+        color = "#4FC3F7"; // Blue color
+        break;
+      default:
+        ticks = "✓";
+    }
+
     return (
-      <>
-        <View style={styles.inputContainer}>
-          <Text style={styles.charCount}>
-            {text.length} / {maxCharacters}
-          </Text>
-        </View>
-        <InputToolbar
-          {...props}
-          containerStyle={{
-            backgroundColor: "#E8E8E8",
-            borderTopColor: "#E8E8E8",
-            borderTopWidth: 1,
-            padding: 8,
-            borderRadius: 50,
-            marginHorizontal: 10,
-            height: 50,
-            marginBottom: 20,
-            justifyContent: "center",
-          }}
-          renderSend={(props) => {
-            return (
-              <>
-                <Send
-                  {...props}
-                  containerStyle={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    alignSelf: "center",
-                    marginRight: 15,
-                  }}
-                ></Send>
-              </>
-            );
-          }}
-        />
-      </>
+      <Text
+        style={{
+          fontSize: 10,
+          color: status === "read" ? "#4FC3F7" : "gray",
+          marginLeft: 5,
+        }}
+      >
+        {ticks}
+      </Text>
     );
-    // return (
-    //   <View>
-    //     <InputToolbar
-    //       {...props}
-    //       containerStyle={styles.toolbarContainer}
-    //       renderComposer={(composerProps) => (
-    //         <View style={styles.inputContainer}>
-    //           <TextInput
-    //             {...composerProps}
-    //             value={text}
-    //             onChangeText={handleTextChange}
-    //             style={styles.textInput}
-    //           />
-    //           <Text style={styles.charCount}>
-    //             {text.length} / {maxCharacters}
-    //           </Text>
-    //         </View>
-    //       )}
-    //       renderSend={(props) => {
-    //         return (
-    //           <>
-    //             <Send
-    //               {...props}
-    //               containerStyle={{
-    //                 justifyContent: "center",
-    //                 alignItems: "center",
-    //                 alignSelf: "center",
-    //                 marginRight: 15,
-    //               }}
-    //             ></Send>
-    //           </>
-    //         );
-    //       }}
-    //     />
-    //   </View>
-    // );
   };
 
   const customBubbleContainer = (props, index) => {
     return (
-      <Bubble
-        key={index}
-        {...props}
-        wrapperStyle={{
-          right: {
-            borderTopRightRadius: 15,
-            backgroundColor: "#95ADAA",
-            borderRadius: 30,
-            borderBottomRightRadius: 30,
-            marginBottom: 5,
-            padding: 5,
-            right: 5,
-            justifyContent: "flex-end",
-            alignSelf: "stretch",
-            marginLeft: 0,
-            alignSelf: "end",
-          },
-          left: {
-            borderTopLeftRadius: 15,
-            borderRadius: 30,
-            borderBottomRightRadius: 30,
-            marginBottom: 5,
-            padding: 5,
-            right: 5,
-            justifyContent: "flex-end",
-            alignSelf: "stretch",
-            marginLeft: 0,
-            alignSelf: "end",
-          },
+      <View
+        style={{
+          fontSize: 10,
+          marginLeft: 5,
+          display: "flex",
+          flexDirection: "row",
         }}
-        containerStyle={{
-          right: {
-            borderRadius: 30,
-            borderBottomRightRadius: 30,
-            marginBottom: 5,
-            padding: 5,
-            right: 5,
-            justifyContent: "flex-end",
-            alignSelf: "stretch",
-            marginLeft: 0,
-            alignSelf: "end",
-          },
-          left: {
-            borderRadius: 30,
-            borderBottomRightRadius: 30,
-            marginBottom: 1,
-          },
-        }}
-      ></Bubble>
+      >
+        <Bubble
+          key={index}
+          {...props}
+          wrapperStyle={{
+            right: {
+              borderTopRightRadius: 15,
+              backgroundColor: "#95ADAA",
+              borderRadius: 30,
+              borderBottomRightRadius: 30,
+              marginBottom: 5,
+              padding: 5,
+              right: 5,
+              justifyContent: "flex-end",
+              alignSelf: "stretch",
+              marginLeft: 0,
+              alignSelf: "end",
+            },
+            left: {
+              borderTopLeftRadius: 15,
+              borderRadius: 30,
+              borderBottomRightRadius: 30,
+              marginBottom: 5,
+              padding: 5,
+              right: 5,
+              justifyContent: "flex-end",
+              alignSelf: "stretch",
+              marginLeft: 0,
+              alignSelf: "end",
+            },
+          }}
+          containerStyle={{
+            right: {
+              borderRadius: 30,
+              borderBottomRightRadius: 30,
+              marginBottom: 5,
+              padding: 5,
+              right: 5,
+              justifyContent: "flex-end",
+              alignSelf: "stretch",
+              marginLeft: 0,
+              alignSelf: "end",
+            },
+            left: {
+              borderRadius: 30,
+              borderBottomRightRadius: 30,
+              marginBottom: 1,
+            },
+          }}
+        ></Bubble>
+        {props.position === "right" && (
+          <TickIndicator status={props?.currentMessage?.status} />
+        )}
+      </View>
     );
   };
   const handleActiveChat = async () => {
@@ -464,7 +528,7 @@ const Chat = ({ route, navigation }) => {
     });
     setQueuedMessages([]);
   };
-  const onSend = (messages = []) => {
+  const onSend = async (messages = []) => {
     const modifiedMessage = {
       ...messages[0],
       user: {
@@ -472,58 +536,63 @@ const Chat = ({ route, navigation }) => {
         _id: `${mobileNum}`,
         name: `${username}`,
       },
+      status: "sent",
     };
-    if (!socket) {
-      return;
-    }
-    if (!isOnline) {
-      setQueuedMessages((prevQueue) => [...prevQueue, modifiedMessage]);
-      return;
-    }
 
     if (chatType == "single") {
+      modifiedMessage.createdAt = Date.now();
+
       const message = {
         type: "send_message",
         request_id: roomId.toString(),
         content: modifiedMessage,
         user_number: mobileNum,
       };
-      socket.send(JSON.stringify(message));
       const payload = {
         roomId: roomId,
         content: messages[0],
         translatedContent: messages[0],
         chatType: "single",
       };
-      dispatch(saveMessage(payload));
+      await dispatch(saveMessage(payload));
       setClearInput(true);
+      if (socketActive === "inactive") {
+        await dispatch(updateQueuedMessage({ message, payload }));
+      } else {
+        socket.send(JSON.stringify(message));
+      }
     }
     if (chatType == "group") {
+      modifiedMessage.createdAt = Date.now();
       const message = {
         type: "send_group_message",
         group_id: roomId.toString(),
         content: modifiedMessage,
         user_number: mobileNum,
       };
-      socket.send(JSON.stringify(message));
       const payload = {
         roomId: roomId,
         content: messages[0],
         translatedContent: messages[0],
         chatType: "group",
       };
-      dispatch(saveMessage(payload));
+      await dispatch(saveMessage(payload));
       setClearInput(true);
+      if (socketActive === "inactive") {
+        await dispatch(updateQueuedMessage({ message, payload }));
+      } else {
+        socket.send(JSON.stringify(message));
+      }
     }
   };
-
   return (
     <React.Fragment>
       <View style={styles.chatContainer}>
         <View style={styles.chatNavBar}>
           <TouchableOpacity
             onPress={() => {
-              setChatData();
+              setChatData([]);
+              setMessages([]);
               if (!socket) return;
               const activePayload = {
                 type: "chat_active",
@@ -531,6 +600,7 @@ const Chat = ({ route, navigation }) => {
                 chatType,
                 active: "false",
               };
+
               socket.send(JSON.stringify(activePayload));
               navigation.navigate("main");
             }}
@@ -562,28 +632,6 @@ const Chat = ({ route, navigation }) => {
               value={transcriptEnabled}
             />
           </View>
-          {/* <View style={styles.regDropdownContainer}>
-            <Dropdown
-              style={[styles.regDropdown, isFocus && { borderColor: "blue" }]}
-              placeholderStyle={styles.regPlaceholderStyle}
-              selectedTextStyle={styles.regSelectedTextStyle}
-              inputSearchStyle={styles.regInputSearchStyle}
-              iconStyle={styles.regIconStyle}
-              data={transcriptType}
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder={!isFocus ? "   +   " : "  ...  "}
-              searchPlaceholder="Search"
-              value={value}
-              onFocus={() => setIsFocus(true)}
-              onBlur={() => setIsFocus(false)}
-              onChange={(item) => {
-                setTranscript(item.value);
-                setIsFocus(false);
-              }}
-            />
-          </View> */}
         </View>
         {!isOnline && (
           <View style={styles.offlineBar}>
@@ -605,8 +653,6 @@ const Chat = ({ route, navigation }) => {
               onSend={(messages) => onSend(messages)}
               showAvatarForEveryMessage={true}
               renderAvatar={null}
-              // alwaysShowSend={true}
-              // renderInputToolbar={(props) => customtInputToolbar(props)}
               renderBubble={(props, index) =>
                 customBubbleContainer(props, index)
               }

@@ -28,7 +28,9 @@ import InAppNotification from "../modal/InAppNotification";
 const MainScreen = ({ navigation }) => {
   const socket = useContext(WebSocketContext);
   const dispatch = useDispatch();
-  const { userData, activeChat } = useSelector((state) => state.chatDataSlice);
+  const { userData, activeChat, socketActive } = useSelector(
+    (state) => state.chatDataSlice
+  );
   const [data, setData] = useState();
   const [showCreateLinkModal, setShowCreateLinkModal] = useState(false);
   const [chatFilter, setChatFilter] = useState("all");
@@ -40,21 +42,19 @@ const MainScreen = ({ navigation }) => {
       authStatus === messaging.AuthorizationStatus.PROVISIONAL
     );
   };
+
   useEffect(() => {
     dispatch(getAsyncDetails());
     Linking.getInitialURL()
       .then(async (url) => {
         if (url !== null) {
-          console.log("navigating to url", url);
           const supported = await Linking.canOpenURL(url);
           if (supported) {
             // Opening the link with some app, if the URL scheme is "http" the web link should be opened
             // by some browser in the mobile
             // await Linking.openURL("babelon://main");
           } else {
-            console.log("unSupported link");
-
-            Alert.alert(`Don't know how to open this URL: ${url}`);
+            // Alert.alert(`Don't know how to open this URL: ${url}`);
           }
           // navigation.navigate(url);
           // if opened from notification if app is killed
@@ -70,6 +70,33 @@ const MainScreen = ({ navigation }) => {
     };
   }, []);
 
+  useEffect(() => {
+    const sendQueuedMessages = async () => {
+      if (socketActive === "active") {
+        const existingData = await AsyncStorage.getItem("userData");
+        if (existingData) {
+          const userQueueData = JSON.parse(existingData);
+          for (const chatType of ["single", "group"]) {
+            if (userQueueData[chatType]) {
+              for (const chat of userQueueData[chatType]) {
+                if (chat?.queuedMsg && chat?.queuedMsg.length > 0) {
+                  for (const message of chat.queuedMsg) {
+                    socket.send(JSON.stringify(message));
+                  }
+                  chat.queuedMsg = []; // Clear the queue after sending
+                }
+              }
+            }
+          }
+          await AsyncStorage.setItem("userData", JSON.stringify(userQueueData));
+          dispatch(getAsyncDetails());
+        }
+      }
+    };
+
+    sendQueuedMessages();
+  }, [socketActive]);
+
   async function handleOpenURL(evt) {
     // Will be called when the link is pressed foreground
     const supported = await Linking.canOpenURL(evt.url);
@@ -81,21 +108,13 @@ const MainScreen = ({ navigation }) => {
       console.log("unSupported link");
     }
   }
-  useEffect(() => {
-    return () => {
-      console.log("Unmouting web socket");
-      if (socket) socket.close();
-    };
-  }, []);
+
   useEffect(() => {
     messaging()
       .getInitialNotification()
       .then(async (remoteMessage) => {
         if (remoteMessage) {
           dispatch(getAsyncDetails());
-          console.log("app opened from notification : ", remoteMessage);
-          // await getCurrentchatData(remoteMessage.data);
-          // navigation.navigate("chatDetails");
           navigation.navigate("chat", {
             data: activeChat,
             userType: remoteMessage.data.userType,
@@ -106,17 +125,28 @@ const MainScreen = ({ navigation }) => {
         }
       });
 
-    messaging().onNotificationOpenedApp(async (remoteMessage) => {});
-    messaging().setBackgroundMessageHandler(async (remoteMessage) => {});
+    messaging().onNotificationOpenedApp(async (remoteMessage) => {
+      if (remoteMessage) {
+        console.log("notification caused app to open", remoteMessage);
+      }
+    });
+    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+      console.log("message handled in background", remoteMessage);
+    });
 
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {});
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+      console.log("New FCM message arrived", remoteMessage);
+      // Alert.alert(remoteMessage.data.hello);
+    });
 
-    // messaging().unsubscribeFromTopic(TOPIC).then(() => {
-    //   console.log(TOPIC, " subscribed");
-    // })
+    messaging()
+      .unsubscribeFromTopic("topic")
+      .then(() => {});
 
     return () => {
-      unsubscribe;
+      // unsubscribe;
+      // console.log("Unmouting web socket");
+      // if (socket) socket.close();
     };
   }, []);
 
@@ -137,7 +167,7 @@ const MainScreen = ({ navigation }) => {
     }
     // delete async data (needed in ENV="DEV" to clear values)
     // AsyncStorage.removeItem("userData");
-    // AsyncStorage.removeItem("access");
+    // AsyncStorage.removeItem("queuedMsg");
     // AsyncStorage.removeItem("websocket_token");
   }, [userData]);
 
@@ -174,9 +204,7 @@ const MainScreen = ({ navigation }) => {
   };
   const HandleFilterChange = (filter) => {
     setChatFilter(filter);
-    console.log("data", userData);
-    const parsedData = JSON.parse(userData);
-    // console.log(parsedData["group"]);
+    // const parsedData = JSON.parse(userData);
     if (userData && userData.length >= 1) {
       if (filter === "all") {
         const parsedData = JSON.parse(userData);

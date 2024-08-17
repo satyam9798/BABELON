@@ -42,10 +42,7 @@ const ChatDetails = ({ navigation, route }) => {
       group_description: tempDescription,
       type: "update_group_details",
     };
-    console.log(payload);
     socket.send(JSON.stringify(payload));
-    // setGroupName(tempName);
-    // setGroupDescription(tempDescription);
     dispatch(setActiveChat({ roomId, chatType }));
     setModalVisible(false);
   };
@@ -66,7 +63,6 @@ const ChatDetails = ({ navigation, route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log("user room change");
       handleActiveChat();
     }, [userData, roomId])
   );
@@ -121,6 +117,7 @@ const ChatDetails = ({ navigation, route }) => {
           />
         </View>
         <Text style={styles.detailsGroupName}>{activeChat?.username}</Text>
+
         {chatType === "group" && (
           <>
             <Text style={styles.detailsGroupDescription}>
@@ -136,7 +133,7 @@ const ChatDetails = ({ navigation, route }) => {
               <Text style={styles.detailsMembersTitle}>Members</Text>
               <View style={styles.memberContainer}>
                 <FlatList
-                  data={members}
+                  data={activeChat?.members}
                   renderItem={renderMember}
                   keyExtractor={(item) => item}
                 />
@@ -159,6 +156,8 @@ const ChatDetails = ({ navigation, route }) => {
               <TouchableOpacity
                 onPress={() => {
                   setModalVisible(false);
+                  setTempName(activeChat.username);
+                  setTempDescription(activeChat.description);
                 }}
                 style={styles.detailsModalCloseBtn}
               >

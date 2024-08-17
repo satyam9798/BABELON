@@ -89,9 +89,7 @@ const VerificationPage = ({ navigation, route }) => {
         if (response.status == 200) {
           response.json().then(async (body) => {
             const oldMobile = await AsyncStorage.getItem("mobileNum");
-            console.log("old no:", oldMobile, "new mob:", mobileNum);
             if (oldMobile != mobileNum) {
-              console.log("Deleting data as registering with new number");
               await AsyncStorage.removeItem("userData");
               await AsyncStorage.removeItem("mobileNum");
               await AsyncStorage.removeItem("access");
@@ -108,6 +106,7 @@ const VerificationPage = ({ navigation, route }) => {
           });
         } else if (response.status == 400) {
           Toast.show("please register again");
+          // navigation.navigate("RegistrationScreen");
         }
       })
       .catch((error) => {

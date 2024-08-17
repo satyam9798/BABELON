@@ -71,7 +71,6 @@ export const createGroupChat = async (postData) => {
   });
 };
 export const acceptRequest = async (postData) => {
-  console.log("accept single req called");
   const payload = {
     request_id: postData.request_id,
   };
@@ -86,7 +85,6 @@ export const acceptRequest = async (postData) => {
   });
 };
 export const acceptGroupRequest = async (postData) => {
-  console.log("accept acceptGroupRequest called");
   const payload = {
     group_id: postData.request_id,
   };

@@ -18,7 +18,6 @@ export const handleToken = createAsyncThunk(
       };
       return fulfillWithValue(response);
     } catch (error) {
-      console.log(error);
       return rejectWithValue("Something went wrong");
     }
   }

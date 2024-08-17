@@ -9,29 +9,31 @@ import {
 import messaging from "@react-native-firebase/messaging";
 import { useSelector, useDispatch } from "react-redux";
 
+import { COLORS } from "../../../constants/theme";
 import { getAsyncDetails } from "../../store/asyncSlice";
 
 const InAppNotification = ({ navigation }) => {
   const dispatch = useDispatch();
   const { activeChat } = useSelector((state) => state.chatDataSlice);
+  const { mobileNum, username } = useSelector((state) => state.asyncDataSlice);
 
   const [notification, setNotification] = useState(null);
   const [animation] = useState(new Animated.Value(-100));
 
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      dispatch(getAsyncDetails());
-
-      console.log("from bar", remoteMessage);
-      // navigation.navigate("chat", {
-      //   data: activeChat,
-      //   userType: remoteMessage.data.userType,
-      //   roomId: remoteMessage.data.roomId,
-      //   chatType: remoteMessage.data.chatType,
-      //   linkType: remoteMessage.data.linkType,
-      // });
-      setNotification(remoteMessage);
-      showNotification();
+      if (remoteMessage.data.fromUser !== mobileNum) {
+        dispatch(getAsyncDetails());
+        // navigation.navigate("chat", {
+        //   data: activeChat,
+        //   userType: remoteMessage.data.userType,
+        //   roomId: remoteMessage.data.roomId,
+        //   chatType: remoteMessage.data.chatType,
+        //   linkType: remoteMessage.data.linkType,
+        // });
+        setNotification(remoteMessage);
+        showNotification();
+      }
     });
 
     return unsubscribe;
@@ -56,25 +58,31 @@ const InAppNotification = ({ navigation }) => {
   if (!notification) return null;
 
   return (
-    <Animated.View
-      style={[styles.container, { transform: [{ translateY: animation }] }]}
-    >
-      <TouchableOpacity
-        onPress={() => {
-          /* Handle notification tap */
-          // navigation.navigate("chat", {
-          //   data: activeChat,
-          //   userType: notification.data.userType,
-          //   roomId: notification.data.roomId,
-          //   chatType: notification.data.chatType,
-          //   linkType: notification.data.linkType,
-          // });
-        }}
-      >
-        <Text style={styles.title}>{notification.notification.title}</Text>
-        <Text style={styles.body}>{notification.notification.body}</Text>
-      </TouchableOpacity>
-    </Animated.View>
+    <>
+      {notification?.notification && (
+        <Animated.View
+          style={[styles.container, { transform: [{ translateY: animation }] }]}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              /* Handle notification tap */
+              // navigation.navigate("chat", {
+              //   data: activeChat,
+              //   userType: notification.data.userType,
+              //   roomId: notification.data.roomId,
+              //   chatType: notification.data.chatType,
+              //   linkType: notification.data.linkType,
+              // });
+            }}
+          >
+            <Text style={styles.title}>
+              {notification?.notification?.title}
+            </Text>
+            <Text style={styles.body}>{notification?.notification?.body}</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+    </>
   );
 };
 

@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getAsyncDetails } from "../store/asyncSlice";
-import { retreiveData, saveMessage, saveGroupMembers, updateGroupDetails } from "../store/dataSlice";
+import { retreiveData, saveMessage, saveGroupMembers, updateGroupDetails, saveSocketStatus } from "../store/dataSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-simple-toast";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -16,21 +16,16 @@ const WebSocketProvider = ({ children }) => {
   const { language, mobileNum, websocketToken } = useSelector((state) => state.asyncDataSlice);
   const [socket, setSocket] = useState(null);
   useEffect(() => {
-    console.log(language, mobileNum, websocketToken);
     if (language != null && mobileNum != null && websocketToken != null) {
       connectWebSocket();
     }
   }, [language, mobileNum, websocketToken]);
+  let messageQueue = [];
+  let isProcessing = false;
 
-  // useEffect(() => {
-  //   dispatch(getAsyncDetails());
-  //   return () => {
-  //     console.log("Unmouting web socket");
-  //     // if (socket) {
-  //     ws.current.close();
-  //     // }
-  //   };
-  // }, []);
+
+
+
   useFocusEffect(
     React.useCallback(() => {
       dispatch(getAsyncDetails());
@@ -61,32 +56,15 @@ const WebSocketProvider = ({ children }) => {
         asyncLanguage
       ), [], options
     );
+
     setSocket(ws.current);
     const webToken = await AsyncStorage.getItem("websocket_token");
     ws.current.onopen = () => {
-      const initiateSocket = {
-        type: "token",
-        content: webToken,
-      };
-      sendData(JSON.stringify(initiateSocket));
 
-      // const fcmPayload = {
-      //   type: "fcm_token",
-      //   content: fcmToken,
-      // };
-      // sendData(JSON.stringify(fcmPayload));
-      // if (ws.current.readyState === WebSocket.OPEN) {
-      // }
-      // const getChats = {
-      //   type: "get_chats",
-      // };
-      // sendData(JSON.stringify(getChats));
-      // const checkMsg = {
-      //   type: "check_messages",
-      // };
-      // sendData(JSON.stringify(checkMsg));
     };
     ws.current.onclose = (e) => {
+      dispatch(saveSocketStatus({ status: "inactive" }))
+
       console.warn("web socket connection closed", e);
     };
     ws.current.onerror = (e) => {
@@ -113,6 +91,13 @@ const WebSocketProvider = ({ children }) => {
             type: "check_messages",
           };
           sendData(JSON.stringify(checkMsg));
+          dispatch(saveSocketStatus({ status: "active" }))
+        } else if (msg?.message === 'send_token') {
+          const initiateSocket = {
+            type: "token",
+            content: webToken,
+          };
+          sendData(JSON.stringify(initiateSocket));
         }
         // handle token messages
       } else if (msg?.type == "user_chats") {
@@ -124,35 +109,73 @@ const WebSocketProvider = ({ children }) => {
       }
       else if (msg?.type == "group_details_update") {
         // handle details update in a group
-        console.log("updated details", msg?.message);
         dispatch(updateGroupDetails(msg?.message));
 
       } else if (msg?.type == "message") {
+        // if (msg?.message?.request_id) {
+        //   const payload = {
+        //     roomId: msg.message?.request_id,
+        //     translatedContent: msg.message?.content,
+        //     content: msg.message?.translated_content,
+        //     chatType: "single",
+        //     username: msg.message?.from_username,
+        //   };
+        //   dispatch(saveMessage(payload));
+        // } else if (msg?.message?.group_id) {
+        //   if (msg?.message.from == mobileNum) {
+        //     // ignoring own messages
+        //   } else {
+        //     const payload = {
+        //       roomId: msg.message?.group_id,
+        //       translatedContent: msg.message?.content,
+        //       content: msg.message?.translated_content,
+        //       chatType: "group",
+        //     };
+        //     dispatch(saveMessage(payload));
+        //   }
+        // }
+        let payload;
         if (msg?.message?.request_id) {
-          const payload = {
+          payload = {
             roomId: msg.message?.request_id,
             translatedContent: msg.message?.content,
             content: msg.message?.translated_content,
             chatType: "single",
             username: msg.message?.from_username,
           };
-          dispatch(saveMessage(payload));
-        } else if (msg?.message?.group_id) {
-          if (msg?.message.from == mobileNum) {
-            // ignoring own messages
-          } else {
-            const payload = {
-              roomId: msg.message?.group_id,
-              translatedContent: msg.message?.content,
-              content: msg.message?.translated_content,
-              chatType: "group",
-            };
-            dispatch(saveMessage(payload));
-          }
+        } else if (msg?.message?.group_id && msg?.message.from !== mobileNum) {
+          payload = {
+            roomId: msg.message?.group_id,
+            translatedContent: msg.message?.content,
+            content: msg.message?.translated_content,
+            chatType: "group",
+          };
+        }
+        if (payload) {
+          messageQueue.push(payload);
+          processMessageQueue();
         }
       }
     };
   };
+
+  const processMessageQueue = async () => {
+    if (isProcessing || messageQueue.length === 0) return;
+
+    isProcessing = true;
+    while (messageQueue.length > 0) {
+      const payload = messageQueue.shift();
+      try {
+        await dispatch(saveMessage(payload));
+      } catch (error) {
+        console.error('Failed to save message:', error);
+        messageQueue.unshift(payload);
+        break;
+      }
+    }
+    isProcessing = false;
+  };
+
   const sendData = (data) => {
     if (ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(data);

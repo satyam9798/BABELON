@@ -1,12 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
+import Toast from "react-native-simple-toast";
 export const retreiveData = createAsyncThunk(
   "retreiveData",
   async (arg, { fulfillWithValue, rejectWithValue }) => {
     try {
       const data = await AsyncStorage.getItem("userData");
-      return fulfillWithValue(data);
+      const queuedMsg = await AsyncStorage.getItem("queuedMsg");
+      return fulfillWithValue({ data, queuedMsg });
     } catch (error) {
       console.log(error);
       return rejectWithValue("Something went wrong");
@@ -112,10 +113,50 @@ export const saveMessage = createAsyncThunk(
       }
       userData[req.chatType][index].msg.push(req.content);
       userData[req.chatType][index].translatedMsg.push(req.translatedContent);
+      // console.log("saving msg", req);
+      // if (req?.queuedMsg) {
+      //   userData[req.chatType][index].queuedMsg.push(req.queuedMsg);
+      //   console.log("saving queud", userData[req.chatType][index].queuedMsg);
+      // }
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
       const updatedData = await AsyncStorage.getItem("userData");
       return fulfillWithValue(updatedData);
     } catch (error) {
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+
+export const updateQueuedMessage = createAsyncThunk(
+  "updateQueuedMessage",
+  async (req, { fulfillWithValue, rejectWithValue }) => {
+    try {
+      // Alert.alert("total msg", req.content[0].text);
+      console.log("sending to queue", req)
+      const existingData = await AsyncStorage.getItem("userData");
+      if (!existingData) {
+        console.error("No existing data found");
+        return;
+      }
+      let userData = JSON.parse(existingData);
+      const index = userData[req.payload.chatType].findIndex(
+        (item) => item.roomId == req.payload.roomId
+      );
+      if (index === -1) {
+        console.error("No object found with the given roomId");
+        return;
+      }
+      if (!userData[req.payload.chatType][index].queuedMsg) {
+        userData[req.payload.chatType][index].queuedMsg = [];
+      }
+      userData[req.payload.chatType][index].queuedMsg.push(req.message);
+      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+      const updatedData = await AsyncStorage.getItem("userData");
+      console.log("user data after saving to queue", userData)
+      return fulfillWithValue(updatedData);
+    } catch (error) {
+      // Alert.alert("error while saving in queue", error)
+      console.warn("errr", error);
       return rejectWithValue("Something went wrong");
     }
   }
@@ -140,6 +181,7 @@ export const saveGroupMembers = createAsyncThunk(
           console.error("No object found with the given roomId");
           return;
         }
+        console.log("mem save", req[key].members)
         userData["group"][index].members = req[key].members;
       }
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
@@ -207,10 +249,24 @@ export const saveStatus = createAsyncThunk(
     }
   }
 );
+export const saveSocketStatus = createAsyncThunk(
+  "saveSocketStatus",
+  async (req, { fulfillWithValue, rejectWithValue }) => {
+    try {
+      const status = req.status;
+      return fulfillWithValue(status);
+    } catch (error) {
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
 
 const chatDataSlice = createSlice({
   name: "chatData",
   initialState: {
+    socketActive: "inactive",
+    socketStatus: "inactive",
+    queuedMsg: [],
     userData: [],
     activeChat: [],
     fetchStatus: "",
@@ -218,7 +274,8 @@ const chatDataSlice = createSlice({
 
   extraReducers: (builder) => {
     builder.addCase(retreiveData.fulfilled, (state, action) => {
-      state.userData = action.payload;
+      state.userData = action.payload.data;
+      state.queuedMsg = action.payload.queuedMsg;
       state.fetchStatus = "Success";
     });
     builder.addCase(retreiveData.pending, (state) => {
@@ -242,11 +299,9 @@ const chatDataSlice = createSlice({
       state.fetchStatus = "Success";
     });
     builder.addCase(saveData.pending, (state) => {
-      console.log("pending saveData");
       state.fetchStatus = "Loading...";
     });
     builder.addCase(saveData.rejected, (state) => {
-      console.log("rejected saveData");
       state.fetchStatus = "Error";
     });
     builder.addCase(saveGroupMembers.fulfilled, (state, action) => {
@@ -254,11 +309,9 @@ const chatDataSlice = createSlice({
       state.fetchStatus = "Success";
     });
     builder.addCase(saveGroupMembers.pending, (state) => {
-      console.log("pending saveData");
       state.fetchStatus = "Loading...";
     });
     builder.addCase(saveGroupMembers.rejected, (state) => {
-      console.log("rejected saveGroupMembers");
       state.fetchStatus = "Error";
     });
     builder.addCase(updateGroupDetails.fulfilled, (state, action) => {
@@ -266,15 +319,28 @@ const chatDataSlice = createSlice({
       state.fetchStatus = "Success";
     });
     builder.addCase(updateGroupDetails.pending, (state) => {
-      console.log("pending saveData");
       state.fetchStatus = "Loading...";
     });
     builder.addCase(updateGroupDetails.rejected, (state) => {
-      console.log("rejected saveGroupMembers");
       state.fetchStatus = "Error";
     });
+    builder.addCase(saveSocketStatus.fulfilled, (state, action) => {
+      state.socketActive = action.payload;
+      state.fetchStatus = "Success";
+      state.socketStatus = action.payload;
+
+    });
+    builder.addCase(saveSocketStatus.pending, (state) => {
+      state.fetchStatus = "Loading...";
+      state.socketStatus = "loading";
+
+    });
+    builder.addCase(saveSocketStatus.rejected, (state) => {
+      state.fetchStatus = "error";
+      state.socketStatus = "error";
+
+    });
     builder.addCase(saveMessage.fulfilled, (state, action) => {
-      // console.log("action", action.payload);
       state.userData = action.payload;
       state.fetchStatus = "Success";
     });
@@ -282,6 +348,17 @@ const chatDataSlice = createSlice({
       state.fetchStatus = "Loading...";
     });
     builder.addCase(saveMessage.rejected, (state, action) => {
+      state.error = action.payload;
+      state.fetchStatus = "Error";
+    });
+    builder.addCase(updateQueuedMessage.fulfilled, (state, action) => {
+      state.queuedMsg = action.payload;
+      state.fetchStatus = "Success";
+    });
+    builder.addCase(updateQueuedMessage.pending, (state) => {
+      state.fetchStatus = "Loading...";
+    });
+    builder.addCase(updateQueuedMessage.rejected, (state, action) => {
       state.error = action.payload;
       state.fetchStatus = "Error";
     });

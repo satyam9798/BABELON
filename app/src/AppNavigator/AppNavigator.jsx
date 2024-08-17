@@ -74,47 +74,6 @@ const AppNavigator = ({}) => {
     fetchInitialRouteName();
   }, []);
 
-  // useEffect(() => {
-  //   Linking.getInitialURL()
-  //     .then(async (url) => {
-  //       if (url !== null) {
-  //         console.log("navigating to url", url);
-  //         const supported = await Linking.canOpenURL(url);
-  //         if (supported) {
-  //           // Opening the link with some app, if the URL scheme is "http" the web link should be opened
-  //           // by some browser in the mobile
-  //           // await Linking.openURL("babelon://main");
-  //         } else {
-  //           console.log("unSupported link");
-
-  //           Alert.alert(`Don't know how to open this URL: ${url}`);
-  //         }
-  //         // navigation.navigate(url);
-  //         // if opened from notification if app is killed
-  //       }
-  //     })
-  //     .catch((err) => console.error("An error occurred", err));
-
-  //   let subcribtion = Linking.addEventListener("url", handleOpenURL);
-  //   subcribtion.subscriber;
-
-  //   return () => {
-  //     subcribtion.remove();
-  //   };
-  // }, []);
-
-  // async function handleOpenURL(evt) {
-  //   // Will be called when the link is pressed foreground
-  //   const supported = await Linking.canOpenURL(evt.url);
-  //   if (supported) {
-  //     // Opening the link with some app, if the URL scheme is "http" the web link should be opened
-  //     // by some browser in the mobile
-  //     // await Linking.openURL(url);
-  //   } else {
-  //     console.log("unSupported link");
-  //   }
-  // }
-
   if (isLoading || !initialRouteName) {
     return <Loader />;
   }

@@ -8,14 +8,11 @@ const SocketEventHandler = () => {
   const socket = useContext(WebSocketContext);
   useEffect(() => {
     const handleSocketClosed = () => {
-      console.log("navigating to the reg screen bcoz of socket error");
       navigation.dispatch(StackActions.replace("RegistrationScreen"));
     };
 
     const handleSocketError = (error) => {
       console.error("Socket error:", error);
-      console.log("navigating to the reg screen bcoz of socket error");
-
       navigation.dispatch(StackActions.replace("RegistrationScreen"));
     };
 

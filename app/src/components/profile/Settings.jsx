@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import Collapsible from "react-native-collapsible";
 import styles from "../../../styles/index.styles";
@@ -29,11 +29,19 @@ const SettingsPage = ({ navigation }) => {
   const { mobileNum, username, language } = useSelector(
     (state) => state.asyncDataSlice
   );
+  const { socketActive, socketStatus } = useSelector(
+    (state) => state.chatDataSlice
+  );
   //added for dev env for fcm token
   const [fcmToken, setFcmToken] = useState(null);
+  let statusActive = useRef(false);
+
   useEffect(() => {
     getData();
   });
+  useEffect(() => {
+    statusActive.current = socketActive;
+  }, [socketActive, socketStatus]);
   const getData = async () => {
     await getFcmToken();
   };
@@ -91,14 +99,8 @@ const SettingsPage = ({ navigation }) => {
               <Text style={styles.detailValue}>{mobileNum}</Text>
             </View>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>FCM Token:</Text>
-              <TouchableOpacity
-                onPress={async () => {
-                  await Clipboard.setStringAsync(fcmToken);
-                }}
-              >
-                <Text style={styles.detailValue}>{fcmToken}</Text>
-              </TouchableOpacity>
+              <Text style={styles.detailLabel}>Socket Active:</Text>
+              <Text style={styles.detailValue}>{socketStatus}</Text>
             </View>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Language:</Text>
