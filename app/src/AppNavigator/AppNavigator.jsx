@@ -40,7 +40,7 @@ const AppNavigator = ({}) => {
   const navigationRef = useRef();
   const linking = {
     prefixes: [
-      "https://bableon-django-1193e2d277c3.herokuapp.com/app",
+      "https://babelonbe-asbcbvhmbhdsfgeg.eastus-01.azurewebsites.net/app",
       "babelon://",
       "",
       "/",

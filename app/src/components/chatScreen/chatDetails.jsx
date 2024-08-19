@@ -199,7 +199,7 @@ const ChatDetails = ({ navigation, route }) => {
         style={styles.settingsButton}
         onPress={async () => {
           if (roomId && chatType && linkType) {
-            const link = `https://bableon-django-1193e2d277c3.herokuapp.com/app/chat/2/${roomId}/${chatType}/${linkType}`;
+            const link = `https://babelonbe-asbcbvhmbhdsfgeg.eastus-01.azurewebsites.net/app/chat/2/${roomId}/${chatType}/${linkType}`;
             const result = await Share.share({
               message: "Hi, start a chat on BabelON  " + link,
             });
