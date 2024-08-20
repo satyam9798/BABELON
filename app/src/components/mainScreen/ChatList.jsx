@@ -50,6 +50,9 @@ const ChatList = ({ data, navigation }) => {
               </Text>
             </View>
             <Text style={styles.ChatlistMsg}>
+              {data?.msg[data.msg.length - 1]?.user?._id
+                ? `${data?.msg[data.msg.length - 1]?.user?._id} : `
+                : ""}
               {truncateMsg(data.msg[data.msg.length - 1]?.text)}
             </Text>
           </View>

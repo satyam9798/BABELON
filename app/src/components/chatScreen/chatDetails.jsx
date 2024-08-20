@@ -61,6 +61,12 @@ const ChatDetails = ({ navigation, route }) => {
     }
   }, [activeChat]);
 
+  useEffect(() => {
+    if ((roomId, chatType)) {
+      dispatch(setActiveChat({ roomId, chatType }));
+    }
+  }, [userData]);
+
   useFocusEffect(
     React.useCallback(() => {
       handleActiveChat();

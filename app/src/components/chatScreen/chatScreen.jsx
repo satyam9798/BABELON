@@ -451,9 +451,9 @@ const Chat = ({ route, navigation }) => {
             },
           }}
         ></Bubble>
-        {props.position === "right" && (
+        {/* {props.position === "right" && (
           <TickIndicator status={props?.currentMessage?.status} />
-        )}
+        )} */}
       </View>
     );
   };
