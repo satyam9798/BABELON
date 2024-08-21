@@ -215,7 +215,7 @@ const VerificationPage = ({ navigation, route }) => {
       {isLoading && <ActivityIndicator size="large" color="#ef8354" />}
       <TouchableOpacity
         style={isDisabled() ? styles.verifyDisabledButton : styles.verifyButton}
-        disabled={isLoading}
+        disabled={isLoading || isDisabled()}
         onPress={nextScreen}
       >
         <Text style={styles.verifyButtonText}>Verify</Text>

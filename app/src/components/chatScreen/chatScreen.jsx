@@ -1,6 +1,20 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { GiftedChat, Bubble } from "react-native-gifted-chat";
-import { View, Text, Image, TouchableOpacity, Switch } from "react-native";
+import {
+  GiftedChat,
+  InputToolbar,
+  Send,
+  Bubble,
+} from "react-native-gifted-chat";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Switch,
+  TextInput,
+  FlatList,
+  Alert,
+} from "react-native";
 import styles from "../../../styles/index.styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
@@ -244,11 +258,11 @@ const Chat = ({ route, navigation }) => {
                   linkType == "temporary"
                     ? tempBackground
                     : permanentBackground,
-                username: `group${roomId}`,
+                username: body?.group_name || `Group${roomId}`,
                 msg: [],
                 queuedMsg: [],
                 translatedMsg: [],
-                description: "Group description",
+                description: body?.group_description || "Group description",
                 members: [],
                 timestamp: formattedDate,
               };
