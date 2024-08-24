@@ -16,8 +16,13 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { COLORS } from "../../../constants/theme";
 import { useSelector, useDispatch } from "react-redux";
-import { getAsyncDetails, handleToken } from "../../store/asyncSlice";
+import {
+  getAsyncDetails,
+  handleToken,
+  retreiveAsyncData,
+} from "../../store/asyncSlice";
 import Toast from "react-native-simple-toast";
+import { retreiveData } from "../../store/dataSlice";
 
 const VerificationPage = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -95,6 +100,7 @@ const VerificationPage = ({ navigation, route }) => {
               await AsyncStorage.removeItem("access");
               await AsyncStorage.removeItem("language");
               dispatch(getAsyncDetails());
+              dispatch(retreiveData());
             }
             setToken(body.access);
             storeData(body);
@@ -106,7 +112,6 @@ const VerificationPage = ({ navigation, route }) => {
           });
         } else if (response.status == 400) {
           Toast.show("please register again");
-          // navigation.navigate("RegistrationScreen");
         }
       })
       .catch((error) => {
@@ -145,24 +150,17 @@ const VerificationPage = ({ navigation, route }) => {
       .then((response) => {})
       .catch((error) => console.error("please register again", error));
 
-    // input1Ref.current.clear();
-    // input2Ref.current.clear();
-    // input3Ref.current.clear();
-    // input4Ref.current.clear();
-    // setInput_1("");
-    // setInput_2("");
-    // setInput_3("");
-    // setInput_4("");
     setOtp("");
     setMinutes(1);
     setSeconds(59);
   };
 
   const isDisabled = () => {
-    if (otp.length !== 4) {
-      return true;
+    const validOtp = /^[0-9]{4}$/;
+    if (validOtp.test(otp)) {
+      return false;
     }
-    return false;
+    return true;
   };
 
   const number = mobileNum;

@@ -70,7 +70,7 @@ const WebSocketProvider = ({ children }) => {
     ws.current.onerror = (e) => {
       console.warn("web socket error occured", e);
     };
-    ws.current.onmessage = (e) => {
+    ws.current.onmessage = async (e) => {
       const msg = JSON.parse(e.data);
       if (msg?.type == "invalid_user") {
       }
@@ -109,7 +109,7 @@ const WebSocketProvider = ({ children }) => {
       }
       else if (msg?.type == "group_details_update") {
         // handle details update in a group
-        dispatch(updateGroupDetails(msg?.message));
+        await dispatch(updateGroupDetails(msg?.message));
 
       } else if (msg?.type == "message") {
         // if (msg?.message?.request_id) {

@@ -43,12 +43,12 @@ import InAppNotification from "../modal/InAppNotification";
 const Chat = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const socket = useContext(WebSocketContext);
-  const { activeChat, userData, socketActive, queuedMsg } = useSelector(
+  const { activeChat, userData, socketActive } = useSelector(
     (state) => state.chatDataSlice
   );
   const { mobileNum, username } = useSelector((state) => state.asyncDataSlice);
   const [isOnline, setIsOnline] = useState(true);
-  const [queuedMessages, setQueuedMessages] = useState([]);
+  const [isExpired, setIsExpired] = useState(false);
   const [clearInput, setClearInput] = useState(false);
   let socketStatus = useRef(socketActive);
   const [transcriptEnabled, setTranscriptEnabled] = useState(false);
@@ -78,7 +78,21 @@ const Chat = ({ route, navigation }) => {
       socket.send(JSON.stringify(activePayload));
     }
   }, [roomId]);
-
+  useEffect(() => {
+    console.log(":: socket status ::  ", socketActive);
+    if (socketActive === "active") {
+      const notifyMembers = {
+        type: "notify_members",
+        group_id: roomId.toString(),
+      };
+      const getChats = {
+        type: "get_chats",
+      };
+      console.log("sending to socket ::", getChats, notifyMembers);
+      socket.send(JSON.stringify(getChats));
+      socket.send(JSON.stringify(notifyMembers));
+    }
+  }, [socketActive, userData, activeChat]);
   useEffect(() => {
     Linking.getInitialURL()
       .then(async (url) => {
@@ -97,16 +111,7 @@ const Chat = ({ route, navigation }) => {
       })
       .catch((err) => console.error("An error occurred", err));
 
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsOnline(state.isConnected);
-      if (state.isConnected) {
-        sendQueuedMessages();
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
+    return () => {};
   }, []);
 
   useEffect(() => {
@@ -210,6 +215,7 @@ const Chat = ({ route, navigation }) => {
                 queuedMsg: [],
                 translatedMsg: [],
                 timestamp: formattedDate,
+                createdAt: Date.now(),
               };
               dispatch(saveData({ data: setData, chatType: chatType }));
             } else if (
@@ -258,35 +264,25 @@ const Chat = ({ route, navigation }) => {
                   linkType == "temporary"
                     ? tempBackground
                     : permanentBackground,
-                username: body?.group_name || `Group${roomId}`,
+                username:
+                  body?.group_name === "Group"
+                    ? `group${roomId}`
+                    : body.group_name,
                 msg: [],
                 queuedMsg: [],
                 translatedMsg: [],
                 description: body?.group_description || "Group description",
                 members: [],
                 timestamp: formattedDate,
+                createdAt: Date.now(),
               };
               dispatch(saveData({ data: setData, chatType: chatType }));
               setChatData(setData);
-              if (socket) {
-                setTimeout(() => {
-                  const getChats = {
-                    type: "get_chats",
-                  };
-
-                  socket.send(JSON.stringify(getChats));
-                  const payload = {
-                    type: "notify_members",
-                    group_id: roomId.toString(),
-                  };
-
-                  socket.send(JSON.stringify(payload));
-                }, 5000);
-              }
             } else if (
               body.message ==
               "Connection request can be used with a single person only"
             ) {
+              Toast.show("Chat link has been used");
             }
           });
         } else {
@@ -484,6 +480,9 @@ const Chat = ({ route, navigation }) => {
   );
   useFocusEffect(
     React.useCallback(() => {
+      if (activeChat) {
+        isChatExpired(activeChat?.linkType, activeChat?.createdAt);
+      }
       if (activeChat && activeChat.msg && activeChat.translatedMsg) {
         if (transcriptEnabled) {
           const sortedMessages = activeChat.translatedMsg
@@ -536,13 +535,31 @@ const Chat = ({ route, navigation }) => {
     }
   }, [clearInput]);
 
-  const sendQueuedMessages = () => {
-    queuedMessages.forEach((message) => {
-      // sendMessage(message);
-    });
-    setQueuedMessages([]);
+  const isChatExpired = (type, createdAt) => {
+    const now = Date.now();
+
+    const oneDay = 24 * 60 * 60 * 1000;
+    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+
+    let expirationTime;
+
+    if (type === "temporary") {
+      expirationTime = oneDay;
+    } else if (type === "permanent") {
+      expirationTime = sevenDays;
+    }
+
+    const expiresAt = createdAt + expirationTime;
+
+    if (now > expiresAt) {
+      setIsExpired(true);
+    } else {
+      setIsExpired(false);
+    }
   };
+
   const onSend = async (messages = []) => {
+    if (isExpired) return;
     const modifiedMessage = {
       ...messages[0],
       user: {
@@ -633,7 +650,11 @@ const Chat = ({ route, navigation }) => {
                 });
               }}
             >
-              <Text style={styles.chatName}>{activeChat.username}</Text>
+              <Text style={styles.chatName}>
+                {activeChat.username?.length > 10
+                  ? `${activeChat.username.slice(0, 10)}...`
+                  : activeChat?.username}
+              </Text>
             </TouchableOpacity>
           )}
           <View>
@@ -647,6 +668,13 @@ const Chat = ({ route, navigation }) => {
             />
           </View>
         </View>
+        {isExpired && (
+          <View style={styles.expiredBar}>
+            <Text style={styles.offlineText}>
+              Chat Expired. You won't be able to send messages.
+            </Text>
+          </View>
+        )}
         {!isOnline && (
           <View style={styles.offlineBar}>
             <Text style={styles.offlineText}>

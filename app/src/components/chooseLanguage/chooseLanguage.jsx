@@ -104,7 +104,9 @@ const ChooseLanguage = ({ navigation, route }) => {
   }
 
   const isDisabled = () => {
-    if (userName != "" && language != "") {
+    const validUsername = /^[a-zA-Z0-9@#_\- ]{1,20}$/;
+
+    if (validUsername.test(userName) && language !== "") {
       return false;
     }
     return true;
@@ -132,19 +134,6 @@ const ChooseLanguage = ({ navigation, route }) => {
           Select your{"\n"} Language and Username
         </Text>
         <View style={styles.languageContainer}>
-          <Text style={styles.userNameHeader}>Username</Text>
-          <View style={styles.userNameInput}>
-            <Image style={styles.usernameIcon} source={images.UserName} />
-            <TextInput
-              style={styles.userNameTextInput}
-              onChangeText={(text) => setuserName(text)}
-              value={userName}
-              maxLength={20}
-              placeholder="Enter your username"
-            />
-          </View>
-        </View>
-        <View style={styles.languageContainer}>
           <Text style={styles.userNameHeader}>Language</Text>
           <View style={styles.dropdownContainer}>
             {/* {renderLabel()} */}
@@ -168,6 +157,19 @@ const ChooseLanguage = ({ navigation, route }) => {
                 setlanguage(item.value);
                 setIsFocus(false);
               }}
+            />
+          </View>
+        </View>
+        <View style={styles.languageContainer}>
+          <Text style={styles.userNameHeader}>Username</Text>
+          <View style={styles.userNameInput}>
+            <Image style={styles.usernameIcon} source={images.UserName} />
+            <TextInput
+              style={styles.userNameTextInput}
+              onChangeText={(text) => setuserName(text)}
+              value={userName}
+              maxLength={20}
+              placeholder="Enter your username"
             />
           </View>
         </View>

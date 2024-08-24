@@ -39,7 +39,8 @@ const RegistrationScreen = ({ navigation }) => {
   };
 
   const isDisabled = () => {
-    if (input.length == 10 && countryCode) {
+    const validMobileNumber = /^[0-9]{10}$/;
+    if (validMobileNumber.test(input) && countryCode) {
       return false;
     }
     return true;

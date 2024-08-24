@@ -1,6 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import Toast from "react-native-simple-toast";
 export const retreiveData = createAsyncThunk(
   "retreiveData",
   async (arg, { fulfillWithValue, rejectWithValue }) => {
@@ -80,7 +79,6 @@ export const saveData = createAsyncThunk(
       if (data[req.chatType]) {
         data[req.chatType].unshift(req.data);
 
-        data[req.chatType] = data[req.chatType].slice(0, 10);
       } else {
         data[req.chatType] = [req.data];
       }
@@ -131,8 +129,6 @@ export const updateQueuedMessage = createAsyncThunk(
   "updateQueuedMessage",
   async (req, { fulfillWithValue, rejectWithValue }) => {
     try {
-      // Alert.alert("total msg", req.content[0].text);
-      console.log("sending to queue", req)
       const existingData = await AsyncStorage.getItem("userData");
       if (!existingData) {
         console.error("No existing data found");
@@ -143,7 +139,7 @@ export const updateQueuedMessage = createAsyncThunk(
         (item) => item.roomId == req.payload.roomId
       );
       if (index === -1) {
-        console.error("No object found with the given roomId");
+        console.warn("No object found with the given roomId while saving queued msg");
         return;
       }
       if (!userData[req.payload.chatType][index].queuedMsg) {
@@ -152,7 +148,6 @@ export const updateQueuedMessage = createAsyncThunk(
       userData[req.payload.chatType][index].queuedMsg.push(req.message);
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
       const updatedData = await AsyncStorage.getItem("userData");
-      console.log("user data after saving to queue", userData)
       return fulfillWithValue(updatedData);
     } catch (error) {
       // Alert.alert("error while saving in queue", error)
@@ -168,7 +163,7 @@ export const saveGroupMembers = createAsyncThunk(
     try {
       const existingData = await AsyncStorage.getItem("userData");
       if (!existingData) {
-        console.error("No existing data found");
+        console.warn("No existing data found while saving group members");
         return;
       }
       let userData = JSON.parse(existingData);
@@ -178,11 +173,11 @@ export const saveGroupMembers = createAsyncThunk(
           (item) => item.roomId == key
         );
         if (index === -1) {
-          console.error("No object found with the given roomId");
-          return;
+          console.warn("No object found with the given roomId while saving members");
+          // return;
+        } else {
+          userData["group"][index].members = req[key].members;
         }
-        console.log("mem save", req[key].members)
-        userData["group"][index].members = req[key].members;
       }
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
       const updatedData = await AsyncStorage.getItem("userData");
@@ -208,7 +203,7 @@ export const updateGroupDetails = createAsyncThunk(
         (item) => item.roomId == req.group_id
       );
       if (index === -1) {
-        console.error("No object found with the given roomId");
+        console.error("No object found with the given roomId while updating group details");
         return;
       }
       userData["group"][index].username = req.group_name;

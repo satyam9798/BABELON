@@ -8,14 +8,17 @@ const ChatList = ({ data, navigation }) => {
   const backgroundColor = data.displayPicture;
 
   const truncateUsername = (username) => {
-    if (username.length > 20) {
-      return username.slice(0, 20) + "...";
+    if (username.length > 18) {
+      return username.slice(0, 18) + "...";
     }
     return username;
   };
   const truncateMsg = (msg) => {
-    if (msg && msg.length > 30) {
-      return msg.slice(0, 30) + "...";
+    if (msg && msg.length > 20) {
+      if (data?.msg[data.msg.length - 1]?.user?._id) {
+        return msg.slice(0, 10) + "...";
+      }
+      return msg.slice(0, 30);
     }
     return msg;
   };
@@ -51,7 +54,7 @@ const ChatList = ({ data, navigation }) => {
             </View>
             <Text style={styles.ChatlistMsg}>
               {data?.msg[data.msg.length - 1]?.user?._id
-                ? `${data?.msg[data.msg.length - 1]?.user?._id} : `
+                ? `${data.msg[data.msg.length - 1]?.user?._id} : `
                 : ""}
               {truncateMsg(data.msg[data.msg.length - 1]?.text)}
             </Text>

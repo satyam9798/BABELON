@@ -1,12 +1,5 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  Image,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, TextInput, Image } from "react-native";
 import * as Linking from "expo-linking";
 import messaging from "@react-native-firebase/messaging";
 import firebase from "@react-native-firebase/app";
@@ -95,7 +88,7 @@ const MainScreen = ({ navigation }) => {
     };
 
     sendQueuedMessages();
-  }, [socketActive]);
+  }, [socketActive, userData]);
 
   async function handleOpenURL(evt) {
     // Will be called when the link is pressed foreground

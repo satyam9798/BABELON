@@ -564,7 +564,8 @@ const styles = StyleSheet.create({
     },
     ChatListBox: {
         width: '100%',
-        marginHorizontal: "2%",
+        marginLeft: 2,
+        marginRight: 2,
         display: "flex",
         flexDirection: "row",
         padding: 12,
@@ -630,6 +631,11 @@ const styles = StyleSheet.create({
     offlineText: {
         color: 'white',
         textAlign: 'center',
+    },
+    // expired chat
+    expiredBar: {
+        backgroundColor: COLORS.grey,
+        padding: 10,
     },
     // custom input toolbar
     inputContainer: {

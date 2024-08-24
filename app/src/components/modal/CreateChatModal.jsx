@@ -19,10 +19,8 @@ import {
 } from "../../AppNavigator/services/apiServices";
 import { useSelector, useDispatch } from "react-redux";
 import { saveData } from "../../store/dataSlice";
-import { WebSocketContext } from "../../context/socketProvider";
 
 const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
-  const socket = useContext(WebSocketContext);
   const dispatch = useDispatch();
   const [linkType, setLinkType] = useState("temporary");
   const [chatType, setChatType] = useState("single");
@@ -71,6 +69,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                 queuedMsg: [],
                 translatedMsg: [],
                 timestamp: formattedDate,
+                createdAt: Date.now(),
               };
               dispatch(saveData({ data: data, chatType: chatType }));
               setIsLoading(false);
@@ -98,7 +97,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
             Toast.show("please login again");
             navigation.navigate("RegistrationScreen");
           } else if (response?.ok) {
-            response.json().then((body) => {
+            response.json().then(async (body) => {
               const link = `https://babelonbe-asbcbvhmbhdsfgeg.eastus-01.azurewebsites.net/app/chat/2/${body.group_id}/${chatType}/${linkType}`;
               const tempBackground = "#92a8d1";
               const permanentBackground = "#eea29a";
@@ -126,17 +125,11 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                 translatedMsg: [],
                 description: "Group description",
                 members: [],
-
+                createdAt: Date.now(),
                 timestamp: formattedDate,
               };
-              dispatch(saveData({ data: data, chatType: chatType }));
+              await dispatch(saveData({ data: data, chatType: chatType }));
               navigation.navigate("linkShare", { link: link, data: data });
-              const getChats = {
-                type: "get_chats",
-              };
-              if (socket) {
-                socket?.send(JSON.stringify(getChats));
-              }
               closeModal();
             });
           } else {
@@ -243,7 +236,11 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
             }}
           >
             {isLoading && <ActivityIndicator size="large" color="#ef8354" />}
-            <TouchableOpacity style={styles.chatLinkBtn} onPress={createLink}>
+            <TouchableOpacity
+              style={styles.chatLinkBtn}
+              disabled={isLoading}
+              onPress={createLink}
+            >
               <Text style={styles.chatLinkBtnText}>Create Link</Text>
             </TouchableOpacity>
           </View>
