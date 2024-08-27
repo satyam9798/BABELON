@@ -11,9 +11,7 @@ import {
   Image,
   TouchableOpacity,
   Switch,
-  TextInput,
-  FlatList,
-  Alert,
+  ActivityIndicator,
 } from "react-native";
 import styles from "../../../styles/index.styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -49,7 +47,6 @@ const Chat = ({ route, navigation }) => {
   const [isOnline, setIsOnline] = useState(true);
   const [isExpired, setIsExpired] = useState(false);
   const [clearInput, setClearInput] = useState(false);
-  let socketStatus = useRef(socketActive);
   const [transcriptEnabled, setTranscriptEnabled] = useState(false);
   const toggleSwitch = () =>
     setTranscriptEnabled((previousState) => !previousState);
@@ -59,8 +56,8 @@ const Chat = ({ route, navigation }) => {
 
   const [chatName, setChatName] = useState();
   const [messages, setMessages] = useState([]);
-  const [text, setText] = useState("");
-  const maxCharacters = 180;
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (activeChat.roomId !== roomId) {
@@ -77,6 +74,7 @@ const Chat = ({ route, navigation }) => {
       socket.send(JSON.stringify(activePayload));
     }
   }, [roomId]);
+
   useEffect(() => {
     console.log(":: socket status ::  ", socketActive);
     if (socketActive === "active") {
@@ -92,6 +90,7 @@ const Chat = ({ route, navigation }) => {
       socket.send(JSON.stringify(notifyMembers));
     }
   }, [socketActive]);
+
   useEffect(() => {
     Linking.getInitialURL()
       .then(async (url) => {
@@ -116,6 +115,7 @@ const Chat = ({ route, navigation }) => {
   useEffect(() => {
     handlelink();
   }, [roomId]);
+
   useEffect(() => {
     if (activeChat && activeChat.msg && activeChat.translatedMsg) {
       if (activeChat.roomId !== roomId) {
@@ -178,6 +178,7 @@ const Chat = ({ route, navigation }) => {
   };
 
   async function acceptChatRequest() {
+    setLoading(true);
     const token = await AsyncStorage.getItem("access");
     const payload = {
       ssoToken: token,
@@ -233,14 +234,17 @@ const Chat = ({ route, navigation }) => {
           Toast.show("Unable to create a chat");
           navigation.navigate("main");
         }
+        setLoading(false);
       })
       .catch((error) => {
+        setLoading(false);
         Toast.show("Error occured while creating chat");
         // console.error("please try again", error);
         navigation.navigate("main");
       });
   }
   async function acceptGroupChatRequest() {
+    setLoading(true);
     const token = await AsyncStorage.getItem("access");
     const payload = {
       ssoToken: token,
@@ -300,10 +304,12 @@ const Chat = ({ route, navigation }) => {
           Toast.show("Unable to create a chat");
           navigation.navigate("main");
         }
+        setLoading(false);
       })
       .catch((error) => {
         Toast.show("Error occured");
         console.error("please try again", error);
+        setLoading(false);
         navigation.navigate("main");
       });
   }
@@ -695,6 +701,14 @@ const Chat = ({ route, navigation }) => {
             </Text>
           </View>
         )}
+        {loading && (
+          <ActivityIndicator
+            style={{ backgroundColor: "white" }}
+            size="large"
+            color="#ef8354"
+          />
+        )}
+        {/* Loader */}
         {userType && (
           <>
             <GiftedChat
