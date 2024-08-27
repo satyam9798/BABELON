@@ -31,8 +31,6 @@ const ChatDetails = ({ navigation, route }) => {
   const [tempName, setTempName] = useState(groupName);
   const [tempDescription, setTempDescription] = useState(groupDescription);
 
-  const members = data?.members;
-
   const handleSubmit = () => {
     if (!socket) return;
     const groupId = roomId.toString();

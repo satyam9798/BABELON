@@ -17,7 +17,6 @@ import {
 } from "react-native";
 import styles from "../../../styles/index.styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import NetInfo from "@react-native-community/netinfo";
 import * as Linking from "expo-linking";
 import { CommonActions } from "@react-navigation/native";
 
@@ -92,7 +91,7 @@ const Chat = ({ route, navigation }) => {
       socket.send(JSON.stringify(getChats));
       socket.send(JSON.stringify(notifyMembers));
     }
-  }, [socketActive, userData, activeChat]);
+  }, [socketActive]);
   useEffect(() => {
     Linking.getInitialURL()
       .then(async (url) => {
@@ -216,22 +215,29 @@ const Chat = ({ route, navigation }) => {
                 translatedMsg: [],
                 timestamp: formattedDate,
                 createdAt: Date.now(),
+                updatedAt: Date.now(),
               };
               dispatch(saveData({ data: setData, chatType: chatType }));
             } else if (
               body.message ==
               "Connection request can be used with a single person only"
             ) {
-              Toast.show("Chat link is invalid");
+              Toast.show("Chat link has been used");
+              navigation.navigate("main");
+            } else if (body.message === "Connection request Expired") {
+              Toast.show("Chat link has expired");
+              navigation.navigate("main");
             }
           });
         } else {
           Toast.show("Unable to create a chat");
+          navigation.navigate("main");
         }
       })
       .catch((error) => {
-        Toast.show("Error occured");
-        console.error("please try again", error);
+        Toast.show("Error occured while creating chat");
+        // console.error("please try again", error);
+        navigation.navigate("main");
       });
   }
   async function acceptGroupChatRequest() {
@@ -275,6 +281,7 @@ const Chat = ({ route, navigation }) => {
                 members: [],
                 timestamp: formattedDate,
                 createdAt: Date.now(),
+                updatedAt: Date.now(),
               };
               dispatch(saveData({ data: setData, chatType: chatType }));
               setChatData(setData);
@@ -283,15 +290,21 @@ const Chat = ({ route, navigation }) => {
               "Connection request can be used with a single person only"
             ) {
               Toast.show("Chat link has been used");
+              navigation.navigate("main");
+            } else if (body.message === "chat group expired") {
+              Toast.show("Chat link has been expired");
+              navigation.navigate("main");
             }
           });
         } else {
           Toast.show("Unable to create a chat");
+          navigation.navigate("main");
         }
       })
       .catch((error) => {
         Toast.show("Error occured");
         console.error("please try again", error);
+        navigation.navigate("main");
       });
   }
   //Input toolbar- customized

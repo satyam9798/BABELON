@@ -79,7 +79,15 @@ const SettingsPage = ({ navigation }) => {
               <Image source={images.Single} style={styles.settingsImage} />
             </View>
             <View style={styles.settingsTextContainer}>
-              <Text style={styles.settingsUsername}>{username}</Text>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.settingsUsername}>{username}</Text>
+                <View
+                  style={[
+                    styles.dot,
+                    socketStatus === "active" ? styles.green : styles.red,
+                  ]}
+                />
+              </View>
               <Text style={styles.settingsMobileNumber}>{mobileNum}</Text>
             </View>
           </View>
@@ -97,10 +105,6 @@ const SettingsPage = ({ navigation }) => {
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Mobile:</Text>
               <Text style={styles.detailValue}>{mobileNum}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Socket Active:</Text>
-              <Text style={styles.detailValue}>{socketStatus}</Text>
             </View>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Language:</Text>
@@ -122,18 +126,23 @@ const SettingsPage = ({ navigation }) => {
             <Collapsible collapsed={isPrivacyCollapsed}>
               <View style={styles.collapsibleContent}>
                 <Text style={styles.privacyPoint}>
-                  • All data is stored locally on your device, not on our
-                  servers
+                  • Your data is securely stored locally on your device and not
+                  on our servers.
                 </Text>
                 <Text style={styles.privacyPoint}>
-                  • Regular security audits ensure your data remains safe
+                  • We conduct regular security audits to ensure the safety and
+                  integrity of your data.
                 </Text>
                 <Text style={styles.privacyPoint}>
-                  • You have full control over your data and can delete it at
-                  any time
+                  • You retain full control over your data and can delete it at
+                  any time through the app.
                 </Text>
                 <Text style={styles.privacyPoint}>
-                  • We do not share your personal information with third parties
+                  • We respect your privacy and do not share your personal
+                  information with any third parties.
+                </Text>
+                <Text style={styles.privacyPoint}>
+                  • All chat data will be automatically deleted after 10 days.
                 </Text>
               </View>
             </Collapsible>

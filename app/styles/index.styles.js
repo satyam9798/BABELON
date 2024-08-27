@@ -739,6 +739,19 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
     },
+    dot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        marginHorizontal: 10,
+        marginVertical: 10
+    },
+    green: {
+        backgroundColor: 'green',
+    },
+    red: {
+        backgroundColor: 'red',
+    },
     settingsMobileNumber: {
         fontSize: 14,
         color: '#666',

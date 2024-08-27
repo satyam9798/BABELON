@@ -41,7 +41,6 @@ const Home = () => {
 
     if (requestUserPermission()) {
       messaging().getToken().then(async (fcmToken) => {
-        console.log("FCM TOKEN : ", fcmToken);
         await AsyncStorage.setItem("fcmToken", fcmToken)
       });
     } else {

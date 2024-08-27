@@ -10,7 +10,6 @@ import ReconnectingWebSocket from "reconnecting-websocket";
 const WebSocketContext = createContext(null);
 
 const WebSocketProvider = ({ children }) => {
-  const navigation = useNavigation();
   const ws = useRef(null);
   const dispatch = useDispatch();
   const { language, mobileNum, websocketToken } = useSelector((state) => state.asyncDataSlice);
@@ -38,7 +37,6 @@ const WebSocketProvider = ({ children }) => {
     }, [])
   );
   const connectWebSocket = async () => {
-    const asyncUsername = await AsyncStorage.getItem("username");
     const asyncLanguage = await AsyncStorage.getItem("language");
     const asyncMobileNum = await AsyncStorage.getItem("mobileNum");
     const fcmToken = await AsyncStorage.getItem("fcmToken");
@@ -46,7 +44,7 @@ const WebSocketProvider = ({ children }) => {
     const options = {
       connectionTimeout: 12000,
       maxRetries: 10,
-      debug: true,
+      debug: false,
     };
     ws.current = new ReconnectingWebSocket(
       encodeURI(
@@ -60,7 +58,6 @@ const WebSocketProvider = ({ children }) => {
     setSocket(ws.current);
     const webToken = await AsyncStorage.getItem("websocket_token");
     ws.current.onopen = () => {
-
     };
     ws.current.onclose = (e) => {
       dispatch(saveSocketStatus({ status: "inactive" }))
@@ -112,28 +109,7 @@ const WebSocketProvider = ({ children }) => {
         await dispatch(updateGroupDetails(msg?.message));
 
       } else if (msg?.type == "message") {
-        // if (msg?.message?.request_id) {
-        //   const payload = {
-        //     roomId: msg.message?.request_id,
-        //     translatedContent: msg.message?.content,
-        //     content: msg.message?.translated_content,
-        //     chatType: "single",
-        //     username: msg.message?.from_username,
-        //   };
-        //   dispatch(saveMessage(payload));
-        // } else if (msg?.message?.group_id) {
-        //   if (msg?.message.from == mobileNum) {
-        //     // ignoring own messages
-        //   } else {
-        //     const payload = {
-        //       roomId: msg.message?.group_id,
-        //       translatedContent: msg.message?.content,
-        //       content: msg.message?.translated_content,
-        //       chatType: "group",
-        //     };
-        //     dispatch(saveMessage(payload));
-        //   }
-        // }
+
         let payload;
         if (msg?.message?.request_id) {
           payload = {

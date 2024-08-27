@@ -8,14 +8,16 @@ import RegistrationScreen from "../components/WelcomeScreen/WelcomeScreens/Regis
 import VerificationPage from "../components/InviteScreen/VerificationPage";
 import ChooseLanguage from "../components/chooseLanguage/chooseLanguage";
 import SocketEventHandler from "../components/socketNavigator/SocketEventHandler";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import Loader from "../components/loader/Loader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Linking from "expo-linking";
-import { useNavigation } from "@react-navigation/native";
+// import { useNavigation } from "@react-navigation/native";
 import SettingsPage from "../components/profile/Settings";
 import ChatDetails from "../components/chatScreen/chatDetails";
+import { useDispatch } from "react-redux";
+import { deleteOldData } from "../store/dataSlice";
 
 const Stack = createNativeStackNavigator();
 
@@ -36,8 +38,7 @@ const getInitialRouteName = async () => {
 const AppNavigator = ({}) => {
   const [initialRouteName, setInitialRouteName] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const navigation = useNavigation();
-  const navigationRef = useRef();
+  const dispatch = useDispatch();
   const linking = {
     prefixes: [
       "https://babelonbe-asbcbvhmbhdsfgeg.eastus-01.azurewebsites.net/app",
@@ -70,6 +71,9 @@ const AppNavigator = ({}) => {
       const routeName = await getInitialRouteName();
       setInitialRouteName(routeName);
       setIsLoading(false);
+      if (routeName === "main") {
+        dispatch(deleteOldData());
+      }
     };
     fetchInitialRouteName();
   }, []);

@@ -89,6 +89,42 @@ export const saveData = createAsyncThunk(
     }
   }
 );
+
+export const deleteOldData = createAsyncThunk(
+  "deleteOldData",
+  async (req, { fulfillWithValue, rejectWithValue }) => {
+    try {
+      console.log("deleting old Data");
+      const existingData = await AsyncStorage.getItem("userData");
+      if (!existingData) {
+        console.error("No existing data found");
+        return;
+      }
+
+      let userData = JSON.parse(existingData);
+
+      const now = new Date();
+      const TEN_DAYS_IN_MS = 10 * 24 * 60 * 60 * 1000;
+      const expiryDate = now.getTime() - TEN_DAYS_IN_MS;
+
+      // Filter out chats older than 10 days
+      Object.keys(userData).forEach((chatType) => {
+        userData[chatType] = userData[chatType].filter((chat) => {
+          const chatDate = new Date(chat.createdAt).getTime();
+          return chatDate >= expiryDate;
+        });
+      });
+
+      // Save the filtered data back to AsyncStorage
+      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+      return fulfillWithValue(JSON.parse(JSON.stringify(userData)));
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+
 export const saveMessage = createAsyncThunk(
   "saveMessage",
   async (req, { fulfillWithValue, rejectWithValue }) => {
@@ -106,16 +142,20 @@ export const saveMessage = createAsyncThunk(
         console.error("No object found with the given roomId");
         return;
       }
+
+      // Update the message content
       if (req.username) {
         userData[req.chatType][index].username = req.username;
       }
       userData[req.chatType][index].msg.push(req.content);
       userData[req.chatType][index].translatedMsg.push(req.translatedContent);
-      // console.log("saving msg", req);
-      // if (req?.queuedMsg) {
-      //   userData[req.chatType][index].queuedMsg.push(req.queuedMsg);
-      //   console.log("saving queud", userData[req.chatType][index].queuedMsg);
-      // }
+      userData[req.chatType][index].updatedAt = new Date().toISOString();
+      // userData[req.chatType][index].updatedAt = '2024-08-15T18:44:01.331Z';
+      // Move the updated chat object to the first index
+      const [updatedChat] = userData[req.chatType].splice(index, 1);
+      userData[req.chatType].unshift(updatedChat);
+
+      // Save the updated data back to AsyncStorage
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
       const updatedData = await AsyncStorage.getItem("userData");
       return fulfillWithValue(updatedData);
@@ -139,19 +179,31 @@ export const updateQueuedMessage = createAsyncThunk(
         (item) => item.roomId == req.payload.roomId
       );
       if (index === -1) {
-        console.warn("No object found with the given roomId while saving queued msg");
+        console.warn(
+          "No object found with the given roomId while saving queued msg"
+        );
         return;
       }
+
+      // Ensure queuedMsg array exists
       if (!userData[req.payload.chatType][index].queuedMsg) {
         userData[req.payload.chatType][index].queuedMsg = [];
       }
+
+      // Push the new queued message
       userData[req.payload.chatType][index].queuedMsg.push(req.message);
+      userData[req.chatType][index].updatedAt = new Date().toISOString();
+
+      // Move the updated chat object to the first index
+      const [updatedChat] = userData[req.payload.chatType].splice(index, 1);
+      userData[req.payload.chatType].unshift(updatedChat);
+
+      // Save the updated data back to AsyncStorage
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
       const updatedData = await AsyncStorage.getItem("userData");
       return fulfillWithValue(updatedData);
     } catch (error) {
-      // Alert.alert("error while saving in queue", error)
-      console.warn("errr", error);
+      console.warn("Error while saving in queue", error);
       return rejectWithValue("Something went wrong");
     }
   }
@@ -297,6 +349,16 @@ const chatDataSlice = createSlice({
       state.fetchStatus = "Loading...";
     });
     builder.addCase(saveData.rejected, (state) => {
+      state.fetchStatus = "Error";
+    });
+    builder.addCase(deleteOldData.fulfilled, (state, action) => {
+      state.userData = action.payload;
+      state.fetchStatus = "Success";
+    });
+    builder.addCase(deleteOldData.pending, (state) => {
+      state.fetchStatus = "Loading...";
+    });
+    builder.addCase(deleteOldData.rejected, (state) => {
       state.fetchStatus = "Error";
     });
     builder.addCase(saveGroupMembers.fulfilled, (state, action) => {

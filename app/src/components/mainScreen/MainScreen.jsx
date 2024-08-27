@@ -1,9 +1,14 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
-import { View, Text, TouchableOpacity, TextInput, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Image,
+  StatusBar,
+} from "react-native";
 import * as Linking from "expo-linking";
 import messaging from "@react-native-firebase/messaging";
-import firebase from "@react-native-firebase/app";
-import { PermissionsAndroid, Platform } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
@@ -13,10 +18,11 @@ import styles from "../../../styles/index.styles";
 import images from "../../../constants/images";
 import CreateChatModal from "../modal/CreateChatModal";
 
-import { getAsyncDetails, handleFcmToken } from "../../store/asyncSlice";
-import { retreiveData, setActiveChat } from "../../store/dataSlice";
+import { getAsyncDetails } from "../../store/asyncSlice";
+import { retreiveData } from "../../store/dataSlice";
 import { WebSocketContext } from "../../context/socketProvider";
 import InAppNotification from "../modal/InAppNotification";
+import { COLORS } from "../../../constants/theme";
 
 const MainScreen = ({ navigation }) => {
   const socket = useContext(WebSocketContext);
@@ -156,6 +162,7 @@ const MainScreen = ({ navigation }) => {
       const allChats = Object.values(parsedData).flatMap((chatType) =>
         Array.isArray(chatType) ? chatType : []
       );
+      allChats.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
       setData(allChats);
     }
     // delete async data (needed in ENV="DEV" to clear values)
@@ -190,6 +197,9 @@ const MainScreen = ({ navigation }) => {
           const allChats = Object.values(parsedData).flatMap((chatType) =>
             Array.isArray(chatType) ? chatType : []
           );
+          allChats.sort(
+            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+          );
           setData(allChats);
         }
       }
@@ -219,6 +229,7 @@ const MainScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.mainContainer, styles.bgOpacity]}>
+      <StatusBar backgroundColor={COLORS.orangeCol} barStyle="light-content" />
       <View style={styles.MainNavbar}>
         <View>
           <Text style={styles.NavbarText}>Chats</Text>

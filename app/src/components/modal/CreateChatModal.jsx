@@ -70,6 +70,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                 translatedMsg: [],
                 timestamp: formattedDate,
                 createdAt: Date.now(),
+                updatedAt: Date.now(),
               };
               dispatch(saveData({ data: data, chatType: chatType }));
               setIsLoading(false);
@@ -126,6 +127,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                 description: "Group description",
                 members: [],
                 createdAt: Date.now(),
+                updatedAt: Date.now(),
                 timestamp: formattedDate,
               };
               await dispatch(saveData({ data: data, chatType: chatType }));
