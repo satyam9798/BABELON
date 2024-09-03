@@ -192,7 +192,7 @@ export const updateQueuedMessage = createAsyncThunk(
 
       // Push the new queued message
       userData[req.payload.chatType][index].queuedMsg.push(req.message);
-      userData[req.chatType][index].updatedAt = new Date().toISOString();
+      userData[req.payload.chatType][index].updatedAt = new Date().toISOString();
 
       // Move the updated chat object to the first index
       const [updatedChat] = userData[req.payload.chatType].splice(index, 1);

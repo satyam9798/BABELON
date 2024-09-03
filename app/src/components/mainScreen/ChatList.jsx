@@ -2,14 +2,17 @@ import React from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import styles from "../../../styles/index.styles";
 import images from "../../../constants/images";
+import { setActiveChat } from "../../store/dataSlice";
+import { useDispatch } from "react-redux";
 
 const ChatList = ({ data, navigation }) => {
-  const initials = data.username.slice(0, 2).toUpperCase();
+  // const initials = data.username.slice(0, 2).toUpperCase();
   const backgroundColor = data.displayPicture;
+  const dispatch = useDispatch();
 
   const truncateUsername = (username) => {
-    if (username.length > 18) {
-      return username.slice(0, 18) + "...";
+    if (username.length > 15) {
+      return username.slice(0, 15) + "...";
     }
     return username;
   };
@@ -26,14 +29,21 @@ const ChatList = ({ data, navigation }) => {
   return (
     <ScrollView style={styles.ChatlistContainer}>
       <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("chat", {
-            data: data,
-            userType: data.userType,
-            roomId: data.roomId,
-            chatType: data.chatType,
-            linkType: data.linkType,
-          });
+        onPress={async () => {
+          try {
+            await dispatch(
+              setActiveChat({ roomId: data.roomId, chatType: data.chatType })
+            );
+            navigation.navigate("chat", {
+              data: data,
+              userType: data.userType,
+              roomId: data.roomId,
+              chatType: data.chatType,
+              linkType: data.linkType,
+            });
+          } catch (error) {
+            console.log(error);
+          }
         }}
       >
         <View style={styles.ChatListBox}>
