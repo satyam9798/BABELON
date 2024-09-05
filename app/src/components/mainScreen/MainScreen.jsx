@@ -27,7 +27,7 @@ import { COLORS } from "../../../constants/theme";
 const MainScreen = ({ navigation }) => {
   const socket = useContext(WebSocketContext);
   const dispatch = useDispatch();
-  const { userData, activeChat, socketActive } = useSelector(
+  const { userData, activeChat, socketActive, queuedMsg } = useSelector(
     (state) => state.chatDataSlice
   );
   const [data, setData] = useState();
@@ -72,29 +72,27 @@ const MainScreen = ({ navigation }) => {
   useEffect(() => {
     const sendQueuedMessages = async () => {
       if (socketActive === "active") {
-        const existingData = await AsyncStorage.getItem("userData");
+        const existingData = await AsyncStorage.getItem("queuedMsg");
         if (existingData) {
-          const userQueueData = JSON.parse(existingData);
-          for (const chatType of ["single", "group"]) {
-            if (userQueueData[chatType]) {
-              for (const chat of userQueueData[chatType]) {
-                if (chat?.queuedMsg && chat?.queuedMsg.length > 0) {
-                  for (const message of chat.queuedMsg) {
-                    socket.send(JSON.stringify(message));
-                  }
-                  chat.queuedMsg = []; // Clear the queue after sending
-                }
-              }
+          let userQueueData = JSON.parse(existingData);
+          if (userQueueData.length > 0) {
+            for (const message of userQueueData) {
+              socket.send(JSON.stringify(message));
             }
+            userQueueData = []; // Clear the queue after sending
           }
-          await AsyncStorage.setItem("userData", JSON.stringify(userQueueData));
+
+          await AsyncStorage.setItem(
+            "queuedMsg",
+            JSON.stringify(userQueueData)
+          );
           dispatch(getAsyncDetails());
         }
       }
     };
 
     sendQueuedMessages();
-  }, [socketActive, userData]);
+  }, [socketActive, queuedMsg]);
 
   async function handleOpenURL(evt) {
     // Will be called when the link is pressed foreground
@@ -108,12 +106,15 @@ const MainScreen = ({ navigation }) => {
     }
   }
 
+  // async function getAsynData() {
+  //   await dispatch(getAsyncDetails());
+  // }
+
   useEffect(() => {
     messaging()
       .getInitialNotification()
       .then(async (remoteMessage) => {
         if (remoteMessage) {
-          dispatch(getAsyncDetails());
           navigation.navigate("chat", {
             data: activeChat,
             userType: remoteMessage.data.userType,
@@ -167,6 +168,7 @@ const MainScreen = ({ navigation }) => {
     }
     // delete async data (needed in ENV="DEV" to clear values)
     // AsyncStorage.removeItem("userData");
+    // AsyncStorage.setItem("username", "satyam Shivam");
     // AsyncStorage.removeItem("queuedMsg");
     // AsyncStorage.removeItem("websocket_token");
   }, [userData]);

@@ -1,10 +1,9 @@
 import React, { createContext, useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getAsyncDetails } from "../store/asyncSlice";
-import { retreiveData, saveMessage, saveGroupMembers, updateGroupDetails, saveSocketStatus } from "../store/dataSlice";
+import { saveMessage, saveGroupMembers, updateGroupDetails, saveSocketStatus } from "../store/dataSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Toast from "react-native-simple-toast";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import ReconnectingWebSocket from "reconnecting-websocket";
 
 const WebSocketContext = createContext(null);
@@ -100,7 +99,9 @@ const WebSocketProvider = ({ children }) => {
       } else if (msg?.type == "user_chats") {
         // handle members in a group
         if (!isObjectEmpty(msg?.message.groups)) {
-          dispatch(saveGroupMembers(msg?.message.groups));
+          setTimeout(async () => {
+            await dispatch(saveGroupMembers(msg?.message.groups));
+          }, 1000);
         }
 
       }
@@ -109,7 +110,6 @@ const WebSocketProvider = ({ children }) => {
         await dispatch(updateGroupDetails(msg?.message));
 
       } else if (msg?.type == "message") {
-
         let payload;
         if (msg?.message?.request_id) {
           payload = {

@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
 export const retreiveData = createAsyncThunk(
   "retreiveData",
   async (arg, { fulfillWithValue, rejectWithValue }) => {
@@ -39,7 +40,7 @@ export const setActiveChat = createAsyncThunk(
   }
 );
 export const setActiveTranscriptedChat = createAsyncThunk(
-  "setActiveChat",
+  "setActiveTranscriptedChat",
   async (req, { fulfillWithValue, rejectWithValue }) => {
     try {
       const existingData = await AsyncStorage.getItem("userData");
@@ -94,7 +95,6 @@ export const deleteOldData = createAsyncThunk(
   "deleteOldData",
   async (req, { fulfillWithValue, rejectWithValue }) => {
     try {
-      console.log("deleting old Data");
       const existingData = await AsyncStorage.getItem("userData");
       if (!existingData) {
         console.error("No existing data found");
@@ -169,39 +169,19 @@ export const updateQueuedMessage = createAsyncThunk(
   "updateQueuedMessage",
   async (req, { fulfillWithValue, rejectWithValue }) => {
     try {
-      const existingData = await AsyncStorage.getItem("userData");
+      let userData;
+      let existingData = await AsyncStorage.getItem("queuedMsg");
       if (!existingData) {
-        console.error("No existing data found");
-        return;
+        userData = [];
+      } else {
+        userData = JSON.parse(existingData);
       }
-      let userData = JSON.parse(existingData);
-      const index = userData[req.payload.chatType].findIndex(
-        (item) => item.roomId == req.payload.roomId
-      );
-      if (index === -1) {
-        console.warn(
-          "No object found with the given roomId while saving queued msg"
-        );
-        return;
-      }
-
-      // Ensure queuedMsg array exists
-      if (!userData[req.payload.chatType][index].queuedMsg) {
-        userData[req.payload.chatType][index].queuedMsg = [];
-      }
-
       // Push the new queued message
-      userData[req.payload.chatType][index].queuedMsg.push(req.message);
-      userData[req.payload.chatType][index].updatedAt = new Date().toISOString();
-
-      // Move the updated chat object to the first index
-      const [updatedChat] = userData[req.payload.chatType].splice(index, 1);
-      userData[req.payload.chatType].unshift(updatedChat);
+      userData.push(req.message);
 
       // Save the updated data back to AsyncStorage
-      await AsyncStorage.setItem("userData", JSON.stringify(userData));
-      const updatedData = await AsyncStorage.getItem("userData");
-      return fulfillWithValue(updatedData);
+      await AsyncStorage.setItem("queuedMsg", JSON.stringify(userData));
+      return fulfillWithValue(userData);
     } catch (error) {
       console.warn("Error while saving in queue", error);
       return rejectWithValue("Something went wrong");
