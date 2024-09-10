@@ -39,26 +39,26 @@ const ShareLink = ({ route, navigation }) => {
     } catch (err) {}
   };
 
-  const share = async (customOptions = options) => {
-    try {
-      const result = await Share.share({
-        message: "Hi, start a chat on BabelON  " + link,
-      });
-      if (result) {
-        if (result.action === Share.sharedAction) {
-          if (result.activityType) {
-            // handle shared activityType
-          } else {
-            // handle shared activityType
-          }
-        } else if (result.action === Share.dismissedAction) {
-          // handle dismissedAction activityType
-        }
-      }
-    } catch (error) {
-      alert(error.message);
-    }
-  };
+  // const share = async (customOptions = options) => {
+  //   try {
+  //     const result = await Share.share({
+  //       message: "Hi, start a chat on BabelON  " + link,
+  //     });
+  //     if (result) {
+  //       if (result.action === Share.sharedAction) {
+  //         if (result.activityType) {
+  //           // handle shared activityType
+  //         } else {
+  //           // handle shared activityType
+  //         }
+  //       } else if (result.action === Share.dismissedAction) {
+  //         // handle dismissedAction activityType
+  //       }
+  //     }
+  //   } catch (error) {
+  //     alert(error.message);
+  //   }
+  // };
   const shareViaWhatsapp = async () => {
     // to share directly to whatsapp application (needed in later phase)
     // sendIntent(

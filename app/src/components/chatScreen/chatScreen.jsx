@@ -33,7 +33,7 @@ import {
   updateQueuedMessage,
 } from "../../store/dataSlice";
 import { useSelector, useDispatch } from "react-redux";
-import { getAsyncDetails, retreiveAsyncData } from "../../store/asyncSlice";
+import { retreiveAsyncData } from "../../store/asyncSlice";
 import CustomInputToolbar from "./CustomInputToolBar";
 import InAppNotification from "../modal/InAppNotification";
 
@@ -405,7 +405,7 @@ const Chat = ({ route, navigation }) => {
         color = "#4FC3F7"; // Blue color
         break;
       default:
-        ticks = "✓";
+        ticks = "✓✓";
     }
 
     return (
@@ -480,9 +480,9 @@ const Chat = ({ route, navigation }) => {
             },
           }}
         ></Bubble>
-        {/* {props.position === "right" && (
+        {props.position === "right" && (
           <TickIndicator status={props?.currentMessage?.status} />
-        )} */}
+        )}
       </View>
     );
   };
@@ -577,8 +577,28 @@ const Chat = ({ route, navigation }) => {
     }
   };
 
+  // const updateMsg = async () => {
+  //   const payload = {
+  //     roomId,
+  //     chatType,
+  //     type: "msg_status",
+  //     msgId: "45ef785d-6c12-4e88-8aa7-986b470d82c1",
+  //     status: "read",
+  //   };
+  //   const allPayload = {
+  //     roomId,
+  //     chatType,
+  //     type: "msg_status",
+  //     chatStatus: "all",
+  //     status: "read",
+  //   };
+  //   await dispatch(updateMessageStatus(allPayload));
+  // };
+
   const onSend = async (messages = []) => {
     if (isExpired) return;
+    messages[0].status = "sent";
+
     const modifiedMessage = {
       ...messages[0],
       user: {
@@ -586,7 +606,6 @@ const Chat = ({ route, navigation }) => {
         _id: `${mobileNum}`,
         name: `${username}`,
       },
-      status: "sent",
     };
 
     if (chatType == "single") {

@@ -3,7 +3,6 @@ import MainScreen from "../components/mainScreen/MainScreen";
 import chatScreen from "../components/chatScreen/chatScreen";
 import linkShare from "../components//linkShare/linkShare";
 import WelcomeScreen from "../components/WelcomeScreen/WelcomeScreens/WelcomeScreen";
-import LandingScreen from "../components/WelcomeScreen/WelcomeScreens/LandingScreen";
 import RegistrationScreen from "../components/WelcomeScreen/WelcomeScreens/RegistrationScreen";
 import VerificationPage from "../components/InviteScreen/VerificationPage";
 import ChooseLanguage from "../components/chooseLanguage/chooseLanguage";
@@ -13,7 +12,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import Loader from "../components/loader/Loader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Linking from "expo-linking";
-// import { useNavigation } from "@react-navigation/native";
 import SettingsPage from "../components/profile/Settings";
 import ChatDetails from "../components/chatScreen/chatDetails";
 import { useDispatch } from "react-redux";
@@ -39,6 +37,7 @@ const AppNavigator = ({}) => {
   const [initialRouteName, setInitialRouteName] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch();
+
   const linking = {
     prefixes: [
       "https://babelonbe-asbcbvhmbhdsfgeg.eastus-01.azurewebsites.net/app",
@@ -97,7 +96,6 @@ const AppNavigator = ({}) => {
             initialRouteName={initialRouteName}
           >
             <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
-            <Stack.Screen name="LandingScreen" component={LandingScreen} />
             <Stack.Screen
               name="RegistrationScreen"
               component={RegistrationScreen}

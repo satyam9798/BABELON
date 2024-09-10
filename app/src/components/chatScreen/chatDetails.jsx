@@ -21,7 +21,9 @@ const ChatDetails = ({ navigation, route }) => {
   const { data, userType, roomId, chatType, linkType } = route?.params || "";
   const socket = useContext(WebSocketContext);
   const dispatch = useDispatch();
-  const { activeChat, userData } = useSelector((state) => state.chatDataSlice);
+  const { activeChat, userData, socketActive } = useSelector(
+    (state) => state.chatDataSlice
+  );
 
   const [groupName, setGroupName] = useState(activeChat.username);
   const [groupDescription, setGroupDescription] = useState(
@@ -65,6 +67,19 @@ const ChatDetails = ({ navigation, route }) => {
     }
   }, [userData]);
 
+  useEffect(() => {
+    if (socketActive === "active" && chatType === "group") {
+      const notifyMembers = {
+        type: "notify_members",
+        group_id: roomId.toString(),
+      };
+      const getChats = {
+        type: "get_chats",
+      };
+      socket.send(JSON.stringify(getChats));
+      socket.send(JSON.stringify(notifyMembers));
+    }
+  }, []);
   useFocusEffect(
     React.useCallback(() => {
       handleActiveChat();
@@ -121,7 +136,9 @@ const ChatDetails = ({ navigation, route }) => {
           />
         </View>
         <Text style={styles.detailsGroupName}>{activeChat?.username}</Text>
-
+        <Text style={styles.detailsGroupDescription}>
+          {activeChat?.linkType} chat
+        </Text>
         {chatType === "group" && (
           <>
             <Text style={styles.detailsGroupDescription}>

@@ -8,21 +8,10 @@ import {
   ActivityIndicator,
 } from "react-native";
 import images from "../../../../constants/images";
-// import styles from "../../../../styles/pages.style";
 import styles from "../../../../styles/index.styles";
 import { verifyMobileNumber } from "../../../AppNavigator/services/apiServices";
-// import { Dropdown } from "react-native-element-dropdown";
 import CountryPicker from "react-native-country-picker-modal";
-// import { LinearGradient } from "expo-linear-gradient";
-import AnimatedLoader from "react-native-animated-loader";
 import { WebSocketContext } from "../../../context/socketProvider";
-
-// const countryCode = [
-//   { label: "+91", value: "+91" },
-//   { label: "+1", value: "+1" },
-//   { label: "+49", value: "+49" },
-//   { label: "+81", value: "+81" },
-// ];
 
 const RegistrationScreen = ({ navigation }) => {
   const socket = useContext(WebSocketContext);
@@ -111,25 +100,14 @@ const RegistrationScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* <View style={styles.resendContainer}>
-        <TouchableOpacity style={styles.resendButton} onPress={handleResendOTP}>
-    <Text style={styles.resendButtonText}>Resend OTP</Text>
-    </TouchableOpacity>
-    </View> */}
       {isLoading && <ActivityIndicator size="large" color="#ef8354" />}
       <TouchableOpacity
         style={isDisabled() ? styles.disabledButton : styles.button}
         disabled={isDisabled() || isLoading}
         onPress={nextScreen}
       >
-        <Text style={styles.buttonText}>
-          Register
-          {/* <ActivityIndicator /> */}
-          {/* <ActivityIndicator size="large" /> */}
-          {/* <ActivityIndicator size="large" color="#00ff00" /> */}
-        </Text>
+        <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
-      {/* <Toast /> */}
     </View>
   );
 };

@@ -38,7 +38,6 @@ const WebSocketProvider = ({ children }) => {
   const connectWebSocket = async () => {
     const asyncLanguage = await AsyncStorage.getItem("language");
     const asyncMobileNum = await AsyncStorage.getItem("mobileNum");
-    const fcmToken = await AsyncStorage.getItem("fcmToken");
 
     const options = {
       connectionTimeout: 12000,
@@ -55,7 +54,6 @@ const WebSocketProvider = ({ children }) => {
     );
 
     setSocket(ws.current);
-    const webToken = await AsyncStorage.getItem("websocket_token");
     ws.current.onopen = () => {
     };
     ws.current.onclose = (e) => {
@@ -68,48 +66,81 @@ const WebSocketProvider = ({ children }) => {
     };
     ws.current.onmessage = async (e) => {
       const msg = JSON.parse(e.data);
-      if (msg?.type == "invalid_user") {
+
+      // Push all incoming messages to the queue
+      messageQueue.push(msg);
+      processMessageQueue();
+    };
+  };
+
+  const processMessageQueue = async () => {
+    if (isProcessing || messageQueue.length === 0) return;
+
+    isProcessing = true;
+    while (messageQueue.length > 0) {
+      const msg = messageQueue.shift();
+
+      try {
+        await processMessageByType(msg);
+      } catch (error) {
+        console.error('Failed to process message:', error);
+        messageQueue.unshift(msg); // Put the message back if processing failed
+        break; // Exit loop and retry later
       }
-      if (msg?.type == "token") {
+    }
+    isProcessing = false;
+  };
+
+  const processMessageByType = async (msg) => {
+    switch (msg?.type) {
+      case "invalid_user":
+        break;
+
+      case "token":
         if (msg?.message === 'accepted') {
+          const fcmToken = await AsyncStorage.getItem("fcmToken");
           const fcmPayload = {
             type: "fcm_token",
             content: fcmToken,
           };
           sendData(JSON.stringify(fcmPayload));
-          if (ws.current.readyState === WebSocket.OPEN) {
-          }
+          // if (ws.current.readyState === WebSocket.OPEN) {
+          //   // Perform additional actions
+          // }
           const getChats = {
             type: "get_chats",
           };
           sendData(JSON.stringify(getChats));
+
           const checkMsg = {
             type: "check_messages",
           };
           sendData(JSON.stringify(checkMsg));
-          dispatch(saveSocketStatus({ status: "active" }))
+
+          dispatch(saveSocketStatus({ status: "active" }));
         } else if (msg?.message === 'send_token') {
+          const webToken = await AsyncStorage.getItem("websocket_token");
           const initiateSocket = {
             type: "token",
             content: webToken,
           };
           sendData(JSON.stringify(initiateSocket));
         }
-        // handle token messages
-      } else if (msg?.type == "user_chats") {
-        // handle members in a group
+        break;
+
+      case "user_chats":
         if (!isObjectEmpty(msg?.message.groups)) {
           setTimeout(async () => {
             await dispatch(saveGroupMembers(msg?.message.groups));
           }, 1000);
         }
+        break;
 
-      }
-      else if (msg?.type == "group_details_update") {
-        // handle details update in a group
+      case "group_details_update":
         await dispatch(updateGroupDetails(msg?.message));
+        break;
 
-      } else if (msg?.type == "message") {
+      case "message":
         let payload;
         if (msg?.message?.request_id) {
           payload = {
@@ -128,28 +159,14 @@ const WebSocketProvider = ({ children }) => {
           };
         }
         if (payload) {
-          messageQueue.push(payload);
-          processMessageQueue();
+          await dispatch(saveMessage(payload));
         }
-      }
-    };
-  };
-
-  const processMessageQueue = async () => {
-    if (isProcessing || messageQueue.length === 0) return;
-
-    isProcessing = true;
-    while (messageQueue.length > 0) {
-      const payload = messageQueue.shift();
-      try {
-        await dispatch(saveMessage(payload));
-      } catch (error) {
-        console.error('Failed to save message:', error);
-        messageQueue.unshift(payload);
         break;
-      }
+
+      default:
+        console.log(`Unhandled message type: ${msg?.type}`);
+        break;
     }
-    isProcessing = false;
   };
 
   const sendData = (data) => {

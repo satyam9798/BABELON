@@ -10,7 +10,6 @@ import {
 import { CommonActions } from "@react-navigation/native";
 import images from "../../../constants/images";
 import styles from "../../../styles/index.styles";
-// import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setUsernameAndLang } from "../../AppNavigator/services/apiServices";
 import { Dropdown } from "react-native-element-dropdown";

@@ -160,6 +160,64 @@ export const saveMessage = createAsyncThunk(
       const updatedData = await AsyncStorage.getItem("userData");
       return fulfillWithValue(updatedData);
     } catch (error) {
+      console.log(error);
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+
+export const updateMessageStatus = createAsyncThunk(
+  "updateMessageStatus",
+  async (arg, { fulfillWithValue, rejectWithValue }) => {
+    try {
+      const existingData = await AsyncStorage.getItem("userData");
+      if (!existingData) {
+        console.error("No existing data found");
+        return;
+      }
+
+      let userData = JSON.parse(existingData);
+      const index = userData[arg.chatType].findIndex(
+        (item) => item.roomId == arg.roomId
+      );
+      if (index === -1) {
+        console.error("No object found with the given roomId");
+        return;
+      }
+
+      if (arg.msgId) {
+
+        const msgIndex = userData[arg.chatType][index].msg.findIndex(
+          (item) => item._id == arg.msgId
+        );
+        if (msgIndex === -1) {
+          console.error("No message found with the given msgId");
+          return;
+        }
+        userData[arg.chatType][index].msg[msgIndex].status = arg.status;
+
+      } else if (arg.chatStatus === "all") {
+
+        userData[arg.chatType][index].msg = userData[arg.chatType][index].msg.map((message) => {
+
+          if (arg.status === "delivered" && message.status === "sent") {
+            return { ...message, status: arg.status };
+          }
+
+          if (arg.status === "read") {
+            return { ...message, status: arg.status };
+          }
+
+          return message;
+        });
+      }
+
+      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+      const updatedData = await AsyncStorage.getItem("userData");
+
+      return fulfillWithValue(updatedData);
+    } catch (error) {
+      console.log(error);
       return rejectWithValue("Something went wrong");
     }
   }
@@ -178,6 +236,7 @@ export const updateQueuedMessage = createAsyncThunk(
       }
       // Push the new queued message
       userData.push(req.message);
+
 
       // Save the updated data back to AsyncStorage
       await AsyncStorage.setItem("queuedMsg", JSON.stringify(userData));
@@ -220,6 +279,7 @@ export const saveGroupMembers = createAsyncThunk(
     }
   }
 );
+
 export const updateGroupDetails = createAsyncThunk(
   "updateGroupDetails",
   async (req, { fulfillWithValue, rejectWithValue }) => {
@@ -385,6 +445,17 @@ const chatDataSlice = createSlice({
       state.fetchStatus = "Loading...";
     });
     builder.addCase(saveMessage.rejected, (state, action) => {
+      state.error = action.payload;
+      state.fetchStatus = "Error";
+    });
+    builder.addCase(updateMessageStatus.fulfilled, (state, action) => {
+      state.userData = action.payload;
+      state.fetchStatus = "Success";
+    });
+    builder.addCase(updateMessageStatus.pending, (state) => {
+      state.fetchStatus = "Loading...";
+    });
+    builder.addCase(updateMessageStatus.rejected, (state, action) => {
       state.error = action.payload;
       state.fetchStatus = "Error";
     });
