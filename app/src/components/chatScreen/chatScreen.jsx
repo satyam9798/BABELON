@@ -47,6 +47,7 @@ const Chat = ({ route, navigation }) => {
   const [isOnline, setIsOnline] = useState(true);
   const [isExpired, setIsExpired] = useState(false);
   const [clearInput, setClearInput] = useState(false);
+  // let socketStatus = useRef(socketActive);
   const [transcriptEnabled, setTranscriptEnabled] = useState(false);
   const toggleSwitch = () =>
     setTranscriptEnabled((previousState) => !previousState);
@@ -56,7 +57,8 @@ const Chat = ({ route, navigation }) => {
 
   const [chatName, setChatName] = useState();
   const [messages, setMessages] = useState([]);
-
+  // const [text, setText] = useState("");
+  // const maxCharacters = 180;
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -90,7 +92,33 @@ const Chat = ({ route, navigation }) => {
       socket.send(JSON.stringify(notifyMembers));
     }
   }, [socketActive]);
+  // useEffect(() => {
+  //   const sendQueuedMessages = async () => {
+  //     if (socketActive === "active") {
+  //       const existingData = await AsyncStorage.getItem("userData");
+  //       if (existingData) {
+  //         const userQueueData = JSON.parse(existingData);
+  //         console.log("user data", userQueueData["single"]);
+  //         for (const chatType of ["single", "group"]) {
+  //           if (userQueueData[chatType]) {
+  //             for (const chat of userQueueData[chatType]) {
+  //               if (chat?.queuedMsg && chat?.queuedMsg.length > 0) {
+  //                 for (const message of chat.queuedMsg) {
+  //                   socket.send(JSON.stringify(message));
+  //                 }
+  //                 chat.queuedMsg = []; // Clear the queue after sending
+  //               }
+  //             }
+  //           }
+  //         }
+  //         await AsyncStorage.setItem("userData", JSON.stringify(userQueueData));
+  //         dispatch(getAsyncDetails());
+  //       }
+  //     }
+  //   };
 
+  //   sendQueuedMessages();
+  // }, [socketActive, userData]);
   useEffect(() => {
     Linking.getInitialURL()
       .then(async (url) => {
@@ -188,6 +216,7 @@ const Chat = ({ route, navigation }) => {
       .then((response) => {
         if (response.ok) {
           response.json().then((body) => {
+            console.log("body", body);
             if (body.message == "Connection request accepted") {
               const currentDate = new Date();
               const year = currentDate.getFullYear();
@@ -252,8 +281,10 @@ const Chat = ({ route, navigation }) => {
     };
     acceptGroupRequest(payload)
       .then((response) => {
+        console.log("body", response);
         if (response.ok) {
           response.json().then((body) => {
+            console.log("body", body);
             if (body.message == "Joined in the group") {
               const currentDate = new Date();
               const year = currentDate.getFullYear();
@@ -596,7 +627,7 @@ const Chat = ({ route, navigation }) => {
   // };
 
   const onSend = async (messages = []) => {
-    if (isExpired) return;
+    // if (isExpired) return;
     messages[0].status = "sent";
 
     const modifiedMessage = {
@@ -650,6 +681,7 @@ const Chat = ({ route, navigation }) => {
       if (socketActive === "inactive") {
         await dispatch(updateQueuedMessage({ message, payload }));
       } else {
+        console.log("chat msg send :: socket");
         socket.send(JSON.stringify(message));
       }
     }
@@ -706,13 +738,13 @@ const Chat = ({ route, navigation }) => {
             />
           </View>
         </View>
-        {isExpired && (
+        {/* {isExpired && (
           <View style={styles.expiredBar}>
             <Text style={styles.offlineText}>
               Chat Expired. You won't be able to send messages.
             </Text>
           </View>
-        )}
+        )} */}
         {!isOnline && (
           <View style={styles.offlineBar}>
             <Text style={styles.offlineText}>

@@ -22,7 +22,7 @@ import { saveData } from "../../store/dataSlice";
 
 const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
   const dispatch = useDispatch();
-  const [linkType, setLinkType] = useState("temporary");
+  const [linkType, setLinkType] = useState("permanent");
   const [chatType, setChatType] = useState("single");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -194,7 +194,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
           <View style={styles.ToggleContainer}>
             <Text style={styles.toggleText}>Select Link type</Text>
             <View>
-              <View style={{ flexDirection: "column" }}>
+              {/* <View style={{ flexDirection: "column" }}>
                 <View style={{ flexDirection: "row" }}>
                   <RadioButton
                     value="temporary"
@@ -205,7 +205,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                     Temporary
                   </Text>
                 </View>
-              </View>
+              </View> */}
               <View style={{ flexDirection: "row" }}>
                 <RadioButton
                   value="permanent"
