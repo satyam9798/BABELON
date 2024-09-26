@@ -162,23 +162,27 @@ const CustomInputToolbar = (props) => {
             <View style={styles.inputContainer}>
               <TextInput
                 {...composerProps}
+                placeholder="Type here . . ."
                 value={text}
                 ref={msgInputRef}
                 onChangeText={handleTextChange}
                 style={styles.textInput}
               />
-              <Text style={styles.charCount}>
-                {text.length} / {maxCharacters}
-              </Text>
+              {text?.length > 0 && (
+                <Text style={styles.charCount}>
+                  {text.length} / {maxCharacters}
+                </Text>
+              )}
             </View>
           )}
           renderSend={(sendProps) => (
             <Send {...sendProps}>
-              <View style={styles.sendButton}>
-                <Image source={images.Send} style={styles.sendIcon} />
+              <View style={styles.sendBtnContainer}>
+                <View style={styles.sendButton}>
+                  <Image source={images.Send} style={styles.sendIcon} />
+                </View>
               </View>
             </Send>
-            // containerStyle={styles.sendContainer} />
           )}
         />
       </View>

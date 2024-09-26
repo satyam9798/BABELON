@@ -136,9 +136,9 @@ const ChatDetails = ({ navigation, route }) => {
           />
         </View>
         <Text style={styles.detailsGroupName}>{activeChat?.username}</Text>
-        <Text style={styles.detailsGroupDescription}>
+        {/* <Text style={styles.detailsGroupDescription}>
           {activeChat?.linkType} chat
-        </Text>
+        </Text> */}
         {chatType === "group" && (
           <>
             <Text style={styles.detailsGroupDescription}>

@@ -643,6 +643,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         flex: 1,
+        backgroundColor: '#f2e8e4',
+        height: 53
     },
     textInput: {
         flex: 1,
@@ -655,6 +657,9 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         color: "gray",
         marginHorizontal: 5
+    },
+    sendBtnContainer: {
+        backgroundColor: '#f2e8e4'
     },
     sendButton: {
         height: 40,

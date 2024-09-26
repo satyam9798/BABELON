@@ -149,6 +149,7 @@ const WebSocketProvider = ({ children }) => {
             content: msg.message?.translated_content,
             chatType: "single",
             username: msg.message?.from_username,
+            error: msg.message?.error
           };
         } else if (msg?.message?.group_id && msg?.message.from !== mobileNum) {
           payload = {
@@ -156,6 +157,7 @@ const WebSocketProvider = ({ children }) => {
             translatedContent: msg.message?.content,
             content: msg.message?.translated_content,
             chatType: "group",
+            error: msg.message?.error,
           };
         }
         if (payload) {

@@ -191,10 +191,10 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
               </View>
             </View>
           </View>
-          <View style={styles.ToggleContainer}>
+          {/* <View style={styles.ToggleContainer}>
             <Text style={styles.toggleText}>Select Link type</Text>
             <View>
-              {/* <View style={{ flexDirection: "column" }}>
+              <View style={{ flexDirection: "column" }}>
                 <View style={{ flexDirection: "row" }}>
                   <RadioButton
                     value="temporary"
@@ -205,7 +205,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                     Temporary
                   </Text>
                 </View>
-              </View> */}
+              </View> 
               <View style={{ flexDirection: "row" }}>
                 <RadioButton
                   value="permanent"
@@ -228,7 +228,7 @@ const CreateChatModal = ({ closeModal, navigation, fetchData }) => {
                 )}
               </View>
             </View>
-          </View>
+          </View> */}
           <View
             style={{
               flex: 1,

@@ -121,6 +121,7 @@ const MainScreen = ({ navigation }) => {
             roomId: remoteMessage.data.roomId,
             chatType: remoteMessage.data.chatType,
             linkType: remoteMessage.data.linkType,
+            notificationNavigate: true,
           });
         }
       });

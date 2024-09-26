@@ -20,7 +20,7 @@ export const setActiveChat = createAsyncThunk(
     try {
       const existingData = await AsyncStorage.getItem("userData");
       if (!existingData) {
-        console.error("No existing data found");
+        console.warn("No existing data found");
         return;
       }
 
@@ -45,7 +45,7 @@ export const setActiveTranscriptedChat = createAsyncThunk(
     try {
       const existingData = await AsyncStorage.getItem("userData");
       if (!existingData) {
-        console.error("No existing data found");
+        console.warn("No existing data found");
         return;
       }
 
@@ -69,7 +69,6 @@ export const saveData = createAsyncThunk(
   "saveData",
   async (req, { fulfillWithValue, rejectWithValue }) => {
     try {
-      // console.log("incoming req", req);
       const existingData = await AsyncStorage.getItem("userData");
       let data = {};
 
@@ -86,6 +85,7 @@ export const saveData = createAsyncThunk(
       await AsyncStorage.setItem("userData", JSON.stringify(data));
       return fulfillWithValue(JSON.parse(JSON.stringify(data)));
     } catch (error) {
+      console.log('saveData', error)
       return rejectWithValue("Something went wrong");
     }
   }
@@ -97,7 +97,7 @@ export const deleteOldData = createAsyncThunk(
     try {
       const existingData = await AsyncStorage.getItem("userData");
       if (!existingData) {
-        console.error("No existing data found");
+        console.wanr("No existing data found while deleting expired chats");
         return;
       }
 
@@ -119,7 +119,7 @@ export const deleteOldData = createAsyncThunk(
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
       return fulfillWithValue(JSON.parse(JSON.stringify(userData)));
     } catch (error) {
-      console.log(error);
+      console.log('deleteOldData', error);
       return rejectWithValue("Something went wrong");
     }
   }
@@ -129,38 +129,142 @@ export const saveMessage = createAsyncThunk(
   "saveMessage",
   async (req, { fulfillWithValue, rejectWithValue }) => {
     try {
+      req.content.error = req.error;
+      req.translatedContent.error = req.error;
+
       const existingData = await AsyncStorage.getItem("userData");
       if (!existingData) {
-        console.error("No existing data found");
-        return;
-      }
-      let userData = JSON.parse(existingData);
-      const index = userData[req.chatType].findIndex(
-        (item) => item.roomId == req.roomId
-      );
-      if (index === -1) {
-        console.error("No object found with the given roomId");
-        return;
-      }
+        let data = {};
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(
+          2,
+          "0"
+        ); // Adding 1 because month starts from 0
+        const day = String(currentDate.getDate()).padStart(2, "0");
 
-      // Update the message content
-      if (req.username) {
-        userData[req.chatType][index].username = req.username;
-      }
-      userData[req.chatType][index].msg.push(req.content);
-      userData[req.chatType][index].translatedMsg.push(req.translatedContent);
-      userData[req.chatType][index].updatedAt = new Date().toISOString();
-      // userData[req.chatType][index].updatedAt = '2024-08-15T18:44:01.331Z';
-      // Move the updated chat object to the first index
-      const [updatedChat] = userData[req.chatType].splice(index, 1);
-      userData[req.chatType].unshift(updatedChat);
+        const formattedDate = `${year}-${month}-${day}`;
+        const tempBackground = "#92a8d1";
+        const permanentBackground = "#eea29a";
 
-      // Save the updated data back to AsyncStorage
-      await AsyncStorage.setItem("userData", JSON.stringify(userData));
-      const updatedData = await AsyncStorage.getItem("userData");
-      return fulfillWithValue(updatedData);
+        const setData = {
+          roomId: req.roomId,
+          userType: 2,
+          chatStatus: '',
+          chatToken: "",
+          chatType: req.chatType,
+          linkType: 'permanent',
+          displayPicture:
+            permanentBackground,
+          username: req.chatType === 'group' ? `group${req.roomId}` : `unknown${req.roomId}`,
+          msg: [],
+          queuedMsg: [],
+          translatedMsg: [],
+          timestamp: formattedDate,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        if (data[req.chatType]) {
+          data[req.chatType].unshift(setData);
+        } else {
+          data[req.chatType] = [setData];
+        }
+        let userData = data;
+        if (!userData[req.chatType]) {
+          userData[req.chatType] = [];
+        }
+        const index = userData[req.chatType].findIndex(
+          (item) => item.roomId == req.roomId
+        );
+        if (index === -1) {
+          console.error("No object found with the given roomId");
+          return;
+        }
+
+        // Update the message content
+        if (setData.username) {
+          userData[setData.chatType][index].username = setData.username;
+        }
+        userData[setData.chatType][index].msg.push(setData.content);
+        userData[setData.chatType][index].translatedMsg.push(setData.translatedContent);
+        userData[setData.chatType][index].updatedAt = new Date().toISOString();
+
+        // Move the updated chat object to the first index
+        const [updatedChat] = userData[setData.chatType].splice(index, 1);
+        userData[setData.chatType].unshift(updatedChat);
+
+        // Save the updated data back to AsyncStorage
+        // await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        const updatedData = await AsyncStorage.getItem("userData");
+        return fulfillWithValue(updatedData);
+      } else {
+
+        let userData = JSON.parse(existingData);
+        if (!userData[req.chatType]) {
+          userData[req.chatType] = [];
+        }
+        const chatIndex = userData[req.chatType].findIndex(
+          (item) => item.roomId == req.roomId
+        );
+        if (chatIndex === -1) {
+          const currentDate = new Date();
+          const year = currentDate.getFullYear();
+          const month = String(currentDate.getMonth() + 1).padStart(
+            2,
+            "0"
+          ); // Adding 1 because month starts from 0
+          const day = String(currentDate.getDate()).padStart(2, "0");
+
+          const formattedDate = `${year}-${month}-${day}`;
+          const tempBackground = "#92a8d1";
+          const permanentBackground = "#eea29a";
+          const setData = {
+            roomId: req.roomId,
+            userType: 2,
+            chatStatus: '',
+            chatToken: "",
+            chatType: req.chatType,
+            linkType: 'permanent',
+            displayPicture:
+              permanentBackground,
+            username: req.chatType === 'group' ? `group${req.roomId}` : `unknown${req.roomId}`,
+            msg: [],
+            queuedMsg: [],
+            translatedMsg: [],
+            timestamp: formattedDate,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+          if (userData[req.chatType]) {
+            userData[req.chatType].unshift(setData);
+          } else {
+            userData[req.chatType] = [setData];
+          }
+          // console.error("No object found with the given roomId");
+          // return;
+        }
+        const index = userData[req.chatType].findIndex(
+          (item) => item.roomId == req.roomId
+        );
+        // Update the message content
+        if (req.username) {
+          userData[req.chatType][index].username = req.username;
+        }
+        userData[req.chatType][index].msg.push(req.content);
+        userData[req.chatType][index].translatedMsg.push(req.translatedContent);
+        userData[req.chatType][index].updatedAt = new Date().toISOString();
+
+        // Move the updated chat object to the first index
+        const [updatedChat] = userData[req.chatType].splice(index, 1);
+        userData[req.chatType].unshift(updatedChat);
+
+        // Save the updated data back to AsyncStorage
+        await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        const updatedData = await AsyncStorage.getItem("userData");
+        return fulfillWithValue(updatedData);
+      }
     } catch (error) {
-      console.log(error);
+      console.log('saveMessage', error);
       return rejectWithValue("Something went wrong");
     }
   }
@@ -217,7 +321,7 @@ export const updateMessageStatus = createAsyncThunk(
 
       return fulfillWithValue(updatedData);
     } catch (error) {
-      console.log(error);
+      console.log('updateMessageStatus', error);
       return rejectWithValue("Something went wrong");
     }
   }
@@ -242,7 +346,7 @@ export const updateQueuedMessage = createAsyncThunk(
       await AsyncStorage.setItem("queuedMsg", JSON.stringify(userData));
       return fulfillWithValue(userData);
     } catch (error) {
-      console.warn("Error while saving in queue", error);
+      console.warn("UpdateQueueMessage", error);
       return rejectWithValue("Something went wrong");
     }
   }
@@ -258,7 +362,6 @@ export const saveGroupMembers = createAsyncThunk(
         return;
       }
       let userData = JSON.parse(existingData);
-
       for await (const [key, value] of Object.entries(req)) {
         const index = userData["group"].findIndex(
           (item) => item.roomId == key
@@ -274,7 +377,7 @@ export const saveGroupMembers = createAsyncThunk(
       const updatedData = await AsyncStorage.getItem("userData");
       return fulfillWithValue(updatedData);
     } catch (error) {
-      console.log("error", error)
+      console.log("updateGroupMembers", error)
       return rejectWithValue("Something went wrong");
     }
   }
@@ -287,7 +390,7 @@ export const updateGroupDetails = createAsyncThunk(
 
       const existingData = await AsyncStorage.getItem("userData");
       if (!existingData) {
-        console.error("No existing data found");
+        console.warn("No existing data found");
         return;
       }
       let userData = JSON.parse(existingData);
@@ -304,7 +407,7 @@ export const updateGroupDetails = createAsyncThunk(
       const updatedData = await AsyncStorage.getItem("userData");
       return fulfillWithValue(updatedData);
     } catch (error) {
-      console.log("error", error)
+      console.log("updateGroupDetails", error)
       return rejectWithValue("Something went wrong");
     }
   }
@@ -316,7 +419,7 @@ export const saveStatus = createAsyncThunk(
     try {
       const existingData = await AsyncStorage.getItem("userData");
       if (!existingData) {
-        console.error("No existing data found");
+        console.warn("No existing data found");
         return;
       }
       let userData = JSON.parse(existingData);
@@ -332,6 +435,7 @@ export const saveStatus = createAsyncThunk(
       const updatedData = await AsyncStorage.getItem("userData");
       return fulfillWithValue(updatedData);
     } catch (error) {
+      console.log('updateStatus', error)
       return rejectWithValue("Something went wrong");
     }
   }
@@ -343,6 +447,7 @@ export const saveSocketStatus = createAsyncThunk(
       const status = req.status;
       return fulfillWithValue(status);
     } catch (error) {
+      console.log('updateSocketStatus', error)
       return rejectWithValue("Something went wrong");
     }
   }
@@ -449,6 +554,7 @@ const chatDataSlice = createSlice({
       state.fetchStatus = "Error";
     });
     builder.addCase(updateMessageStatus.fulfilled, (state, action) => {
+      // console.log("::saved::", action.payload);
       state.userData = action.payload;
       state.fetchStatus = "Success";
     });

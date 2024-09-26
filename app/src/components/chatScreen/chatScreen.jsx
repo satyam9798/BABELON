@@ -52,13 +52,12 @@ const Chat = ({ route, navigation }) => {
   const toggleSwitch = () =>
     setTranscriptEnabled((previousState) => !previousState);
 
-  const { data, userType, roomId, chatType, linkType } = route?.params || "";
+  const { data, userType, roomId, chatType, linkType, notificationNavigate } =
+    route?.params || "";
   const [chatData, setChatData] = useState(data);
 
   const [chatName, setChatName] = useState();
   const [messages, setMessages] = useState([]);
-  // const [text, setText] = useState("");
-  // const maxCharacters = 180;
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -92,33 +91,7 @@ const Chat = ({ route, navigation }) => {
       socket.send(JSON.stringify(notifyMembers));
     }
   }, [socketActive]);
-  // useEffect(() => {
-  //   const sendQueuedMessages = async () => {
-  //     if (socketActive === "active") {
-  //       const existingData = await AsyncStorage.getItem("userData");
-  //       if (existingData) {
-  //         const userQueueData = JSON.parse(existingData);
-  //         console.log("user data", userQueueData["single"]);
-  //         for (const chatType of ["single", "group"]) {
-  //           if (userQueueData[chatType]) {
-  //             for (const chat of userQueueData[chatType]) {
-  //               if (chat?.queuedMsg && chat?.queuedMsg.length > 0) {
-  //                 for (const message of chat.queuedMsg) {
-  //                   socket.send(JSON.stringify(message));
-  //                 }
-  //                 chat.queuedMsg = []; // Clear the queue after sending
-  //               }
-  //             }
-  //           }
-  //         }
-  //         await AsyncStorage.setItem("userData", JSON.stringify(userQueueData));
-  //         dispatch(getAsyncDetails());
-  //       }
-  //     }
-  //   };
 
-  //   sendQueuedMessages();
-  // }, [socketActive, userData]);
   useEffect(() => {
     Linking.getInitialURL()
       .then(async (url) => {
@@ -212,65 +185,107 @@ const Chat = ({ route, navigation }) => {
       ssoToken: token,
       request_id: roomId,
     };
-    acceptRequest(payload)
-      .then((response) => {
-        if (response.ok) {
-          response.json().then((body) => {
-            console.log("body", body);
-            if (body.message == "Connection request accepted") {
-              const currentDate = new Date();
-              const year = currentDate.getFullYear();
-              const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Adding 1 because month starts from 0
-              const day = String(currentDate.getDate()).padStart(2, "0");
+    if (!notificationNavigate) {
+      acceptRequest(payload)
+        .then((response) => {
+          if (response.ok) {
+            response.json().then((body) => {
+              console.log("body", body);
+              if (body.message == "Connection request accepted") {
+                const currentDate = new Date();
+                const year = currentDate.getFullYear();
+                const month = String(currentDate.getMonth() + 1).padStart(
+                  2,
+                  "0"
+                ); // Adding 1 because month starts from 0
+                const day = String(currentDate.getDate()).padStart(2, "0");
 
-              const formattedDate = `${year}-${month}-${day}`;
-              const tempBackground = "#92a8d1";
-              const permanentBackground = "#eea29a";
-              const background =
-                "#" + Math.floor(Math.random() * 16777215).toString(16);
-              const setData = {
-                roomId: roomId,
-                userType: 2,
-                chatStatus: body.message,
-                chatToken: "",
-                chatType: chatType,
-                linkType: linkType,
-                displayPicture:
-                  linkType == "temporary"
-                    ? tempBackground
-                    : permanentBackground,
-                username: `unknown${roomId}`,
-                msg: [],
-                queuedMsg: [],
-                translatedMsg: [],
-                timestamp: formattedDate,
-                createdAt: Date.now(),
-                updatedAt: Date.now(),
-              };
-              dispatch(saveData({ data: setData, chatType: chatType }));
-            } else if (
-              body.message ==
-              "Connection request can be used with a single person only"
-            ) {
-              Toast.show("Chat link has been used");
-              navigation.navigate("main");
-            } else if (body.message === "Connection request Expired") {
-              Toast.show("Chat link has expired");
-              navigation.navigate("main");
-            }
-          });
-        } else {
-          Toast.show("Unable to create a chat");
+                const formattedDate = `${year}-${month}-${day}`;
+                const tempBackground = "#92a8d1";
+                const permanentBackground = "#eea29a";
+                const background =
+                  "#" + Math.floor(Math.random() * 16777215).toString(16);
+                const setData = {
+                  roomId: roomId,
+                  userType: 2,
+                  chatStatus: body.message,
+                  chatToken: "",
+                  chatType: chatType,
+                  linkType: linkType,
+                  displayPicture:
+                    linkType == "temporary"
+                      ? tempBackground
+                      : permanentBackground,
+                  username: `unknown${roomId}`,
+                  msg: [],
+                  queuedMsg: [],
+                  translatedMsg: [],
+                  timestamp: formattedDate,
+                  createdAt: Date.now(),
+                  updatedAt: Date.now(),
+                };
+                dispatch(saveData({ data: setData, chatType: chatType }));
+              } else if (
+                body.message ==
+                "Connection request can be used with a single person only"
+              ) {
+                Toast.show("Chat link has been used");
+                navigation.navigate("main");
+              } else if (body.message === "Connection request Expired") {
+                Toast.show("Chat link has expired");
+                navigation.navigate("main");
+              }
+            });
+          } else {
+            Toast.show("Unable to create a chat");
+            navigation.navigate("main");
+          }
+          setLoading(false);
+        })
+        .catch((error) => {
+          setLoading(false);
+          Toast.show("Error occured while creating chat");
+          // console.error("please try again", error);
           navigation.navigate("main");
-        }
+        });
+    } else {
+      try {
+        console.log("CREATING ::: trying to directly create a single chat");
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Adding 1 because month starts from 0
+        const day = String(currentDate.getDate()).padStart(2, "0");
+
+        const formattedDate = `${year}-${month}-${day}`;
+        const tempBackground = "#92a8d1";
+        const permanentBackground = "#eea29a";
+
+        const setData = {
+          roomId: roomId,
+          userType: 2,
+          chatStatus: "",
+          chatToken: "",
+          chatType: chatType,
+          linkType: linkType,
+          displayPicture:
+            linkType == "temporary" ? tempBackground : permanentBackground,
+          username: `unknown${roomId}`,
+          msg: [],
+          queuedMsg: [],
+          translatedMsg: [],
+          timestamp: formattedDate,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        dispatch(saveData({ data: setData, chatType: chatType }));
         setLoading(false);
-      })
-      .catch((error) => {
+      } catch {
         setLoading(false);
         Toast.show("Error occured while creating chat");
         // console.error("please try again", error);
-        navigation.navigate("main");
-      });
+        // navigation.navigate("main");
+      }
+    }
   }
   async function acceptGroupChatRequest() {
     setLoading(true);
@@ -279,70 +294,113 @@ const Chat = ({ route, navigation }) => {
       ssoToken: token,
       request_id: roomId,
     };
-    acceptGroupRequest(payload)
-      .then((response) => {
-        console.log("body", response);
-        if (response.ok) {
-          response.json().then((body) => {
-            console.log("body", body);
-            if (body.message == "Joined in the group") {
-              const currentDate = new Date();
-              const year = currentDate.getFullYear();
-              const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Adding 1 because month starts from 0
-              const day = String(currentDate.getDate()).padStart(2, "0");
+    if (!notificationNavigate) {
+      acceptGroupRequest(payload)
+        .then((response) => {
+          console.log("body", response);
+          if (response.ok) {
+            response.json().then((body) => {
+              console.log("body", body);
+              if (body.message == "Joined in the group") {
+                const currentDate = new Date();
+                const year = currentDate.getFullYear();
+                const month = String(currentDate.getMonth() + 1).padStart(
+                  2,
+                  "0"
+                ); // Adding 1 because month starts from 0
+                const day = String(currentDate.getDate()).padStart(2, "0");
 
-              const formattedDate = `${year}-${month}-${day}`;
-              const tempBackground = "#92a8d1";
-              const permanentBackground = "#eea29a";
-              const setData = {
-                roomId: roomId,
-                userType: 2,
-                chatType: chatType,
-                linkType: linkType,
-                chatStatus: body.message,
-                chatToken: "",
-                displayPicture:
-                  linkType == "temporary"
-                    ? tempBackground
-                    : permanentBackground,
-                username:
-                  body?.group_name === "Group"
-                    ? `group${roomId}`
-                    : body.group_name,
-                msg: [],
-                queuedMsg: [],
-                translatedMsg: [],
-                description: body?.group_description || "Group description",
-                members: [],
-                timestamp: formattedDate,
-                createdAt: Date.now(),
-                updatedAt: Date.now(),
-              };
-              dispatch(saveData({ data: setData, chatType: chatType }));
-              setChatData(setData);
-            } else if (
-              body.message ==
-              "Connection request can be used with a single person only"
-            ) {
-              Toast.show("Chat link has been used");
-              navigation.navigate("main");
-            } else if (body.message === "chat group expired") {
-              Toast.show("Chat link has been expired");
-              navigation.navigate("main");
-            }
-          });
-        } else {
-          Toast.show("Unable to create a chat");
+                const formattedDate = `${year}-${month}-${day}`;
+                const tempBackground = "#92a8d1";
+                const permanentBackground = "#eea29a";
+                const setData = {
+                  roomId: roomId,
+                  userType: 2,
+                  chatType: chatType,
+                  linkType: linkType,
+                  chatStatus: body.message,
+                  chatToken: "",
+                  displayPicture:
+                    linkType == "temporary"
+                      ? tempBackground
+                      : permanentBackground,
+                  username:
+                    body?.group_name === "Group"
+                      ? `group${roomId}`
+                      : body.group_name,
+                  msg: [],
+                  queuedMsg: [],
+                  translatedMsg: [],
+                  description: body?.group_description || "Group description",
+                  members: [],
+                  timestamp: formattedDate,
+                  createdAt: Date.now(),
+                  updatedAt: Date.now(),
+                };
+                dispatch(saveData({ data: setData, chatType: chatType }));
+                setChatData(setData);
+              } else if (
+                body.message ==
+                "Connection request can be used with a single person only"
+              ) {
+                Toast.show("Chat link has been used");
+                navigation.navigate("main");
+              } else if (body.message === "chat group expired") {
+                Toast.show("Chat link has been expired");
+                navigation.navigate("main");
+              }
+            });
+          } else {
+            Toast.show("Unable to create a chat");
+            navigation.navigate("main");
+          }
+          setLoading(false);
+        })
+        .catch((error) => {
+          Toast.show("Error occured");
+          console.error("please try again", error);
+          setLoading(false);
           navigation.navigate("main");
-        }
+        });
+    } else {
+      try {
+        console.log("CREATING ::: trying to directly create a group chat");
+
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Adding 1 because month starts from 0
+        const day = String(currentDate.getDate()).padStart(2, "0");
+
+        const formattedDate = `${year}-${month}-${day}`;
+        const tempBackground = "#92a8d1";
+        const permanentBackground = "#eea29a";
+        const setData = {
+          roomId: roomId,
+          userType: 2,
+          chatType: chatType,
+          linkType: linkType,
+          chatStatus: "",
+          chatToken: "",
+          displayPicture:
+            linkType == "temporary" ? tempBackground : permanentBackground,
+          username: `group${roomId}`,
+          msg: [],
+          queuedMsg: [],
+          translatedMsg: [],
+          description: "Group description",
+          members: [],
+          timestamp: formattedDate,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        dispatch(saveData({ data: setData, chatType: chatType }));
+        setChatData(setData);
+      } catch {
         setLoading(false);
-      })
-      .catch((error) => {
-        Toast.show("Error occured");
-        console.error("please try again", error);
-        setLoading(false);
-        navigation.navigate("main");
-      });
+        Toast.show("Error occured while creating chat");
+      }
+      setLoading(false);
+    }
   }
   //Input toolbar- customized
   // const customtInputToolbar = (props) => {
@@ -482,6 +540,8 @@ const Chat = ({ route, navigation }) => {
             left: {
               borderTopLeftRadius: 15,
               borderRadius: 30,
+              borderWidth: props?.currentMessage.error ? 0.5 : 0,
+              borderColor: props?.currentMessage.error ? "red" : "grey",
               borderBottomRightRadius: 30,
               marginBottom: 5,
               padding: 5,
@@ -511,9 +571,9 @@ const Chat = ({ route, navigation }) => {
             },
           }}
         ></Bubble>
-        {props.position === "right" && (
+        {/* {props.position === "right" && (
           <TickIndicator status={props?.currentMessage?.status} />
-        )}
+        )} */}
       </View>
     );
   };
